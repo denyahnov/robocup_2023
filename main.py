@@ -9,7 +9,6 @@ from ev3dev2.sensor import *
 from ev3dev2.sensor.lego import *
 
 import math
-from smbus import SMBus
 from time import sleep
 
 class SoccerRobot(rc.Robot):
@@ -38,17 +37,14 @@ class SoccerRobot(rc.Robot):
 	def init_ports(self):
 		"""Initialise all motors and sensors"""
 
-		# Open i2c bus 3 (plugged in on Port 1) and read one byte from address 0x08, offset 0
-		self.bus = SMBus(1 + 2)
-
 		self.Port['A'] = MediumMotor(OUTPUT_A)
 		self.Port['B'] = MediumMotor(OUTPUT_B)
 		self.Port['C'] = MediumMotor(OUTPUT_C)
 		self.Port['D'] = MediumMotor(OUTPUT_D)
 
-		# self.Port['2'] = Sensor(INPUT_2,driver_name=rc.Driver.COMPASS)
-
-		# self.Port['3'] = UltrasonicSensor(INPUT_3)
+		self.Port['1'] = rc.IRSeeker360(INPUT_1)
+		self.Port['2'] = Sensor(INPUT_2,driver_name=rc.Driver.COMPASS)
+		self.Port['3'] = UltrasonicSensor(INPUT_3)
 
 	def init_variables(self):
 		"""Create useful variables"""
@@ -109,20 +105,19 @@ class SoccerRobot(rc.Robot):
 			back_left		# Motor D
 		]
 
-	def SmoothAngle(self,current,target):
-		smoothing = 1.25
+	def SmoothAngle(self, current, target, smoothing = 0.5, min_speed = 5):
+		"""Smooth the transition from 2 angles"""
 
-		diff = abs(current - target)
-		if diff > 270: diff -= 270
+		diff = current - target
 
-		diff /= smoothing
+		while diff < -180: diff += 360
+		while diff > 180: diff -= 360
 
-		if current - smoothing / 2 < target: 
-			return current + diff
-		elif current + smoothing / 2 > target: 
-			return current - diff
+		increase = abs(diff) * smoothing
 
-		return current
+		rtn = target - increase
+
+		return rtn if rtn > min_speed else target
 
 	def FixBallAngle(self,ball_angle:int) -> int:
 		"""Convert IR angle to 360 degrees"""
@@ -146,13 +141,8 @@ class SoccerRobot(rc.Robot):
 			# Stop program if middle or exit button pressed
 			if self.Buttons.enter or self.Buttons.backspace: break
 
-			# Read 360 infrared sensor bin data in bytes form
-			raw_ir = [self.bus.read_i2c_block_data(0x08, i, 2) for i in range(0, 12)]
-
-			all_angles = [value for value in raw_ir[0] if value < 13]
-
-			# Unpack data
-			ball_angle, ball_strength = max(set(all_angles), key = all_angles.count), max(set(raw_ir[1]), key = raw_ir[1].count)
+			# Unpack IR data
+			ball_angle, ball_strength = self.Port['1'].read()
 
 			# Get our target angle (towards the ball)
 			target_angle = self.FixBallAngle(ball_angle)
@@ -183,9 +173,6 @@ class SoccerRobot(rc.Robot):
 
 		# Run the menu
 		self.menu.Run()
-
-		# Close I2C Bus
-		self.bus.close()
 
 		# Once finished reset motors and change color back to green
 		self.CoastMotors()
