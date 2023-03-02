@@ -55,23 +55,32 @@ class SoccerRobot(rc.Robot):
 		self.max_speed = 80
 		self.min_speed = 30
 
+		self.sound_volume = 20
+
 	def calibrate(self,initiating=False):
 		"""Calibrate all sensors, Reset motor positions and read goal heading + wall distance"""
+
+		# Set brick color to orange
 		self.Color('orange')
 
 		#######################################
 
+		# Reset Motors
 		self.ResetMotors()
 
+		# Reset Variables
 		self.goal_heading = self.Port['2'].read()
 		self.center_distance = self.Port['3'].distance_centimeters
 
+		# Set sound volume
+		self.Sound.set_volume(self.sound_volume)
+
 		#######################################
 
-		self.Sound.set_volume(20)
-
+		# Play beep to indicate calibration finished
 		self.Sound.play_tone(650,0.3,0,20,self.Sound.PLAY_NO_WAIT_FOR_COMPLETE)
 
+		# Reset brick color
 		self.Color('green')
 
 	def close_menu(self):
@@ -90,10 +99,10 @@ class SoccerRobot(rc.Robot):
 
 		# Returns the speeds in [A,B,C,D] form
 		return [
-			front_right,
-			back_right,
-			front_left,
-			back_left
+			front_right, 	# Motor A
+			back_right,		# Motor B
+			front_left,		# Motor C
+			back_left		# Motor D
 		]
 
 	def FixBallAngle(self,ball_angle:int) -> int:
@@ -118,8 +127,8 @@ class SoccerRobot(rc.Robot):
 			# Stop program if middle or exit button pressed
 			if self.Buttons.enter or self.Buttons.backspace: break
 
-			# Read 360 infrared sensor data
-			raw_ir = self.Port['1'].read()
+			# Read 360 infrared sensor bin data in bytes form
+			raw_ir = self.Port['1'].bin_data('<b')
 
 			# Unpack data
 			ball_angle, ball_strength = raw_ir
@@ -144,13 +153,17 @@ class SoccerRobot(rc.Robot):
 			print("Ball Strength:",ball_strength)
 			print("Fixed Angle",target_angle)
 
+		# Stop motors and reset brick color 
 		self.CoastMotors()
 		self.Color('green')
 
 	def Begin(self):
-		"""Run the menu. Once finished reset motors and change color back to green"""
+		""" WHAT WE WANT TO CALL WHEN RUNNING CODE """
+
+		# Run the menu
 		self.menu.Run()
 
+		# Once finished reset motors and change color back to green
 		self.CoastMotors()
 		self.Color('green')
 
