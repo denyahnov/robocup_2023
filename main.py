@@ -4,10 +4,12 @@ import RoboCup as rc
 from RoboCup.Menu import Menu, MenuButton
 
 from ev3dev2.motor import *
+from ev3dev2.port import *
 from ev3dev2.sensor import *
 from ev3dev2.sensor.lego import *
 
 import math
+from smbus import SMBus
 from time import sleep
 
 class SoccerRobot(rc.Robot):
@@ -36,15 +38,17 @@ class SoccerRobot(rc.Robot):
 	def init_ports(self):
 		"""Initialise all motors and sensors"""
 
+		# Open i2c bus 3 (plugged in on Port 1) and read one byte from address 0x08, offset 0
+		self.bus = SMBus(1 + 2)
+
 		self.Port['A'] = MediumMotor(OUTPUT_A)
 		self.Port['B'] = MediumMotor(OUTPUT_B)
 		self.Port['C'] = MediumMotor(OUTPUT_C)
 		self.Port['D'] = MediumMotor(OUTPUT_D)
 
-		self.Port['1'] = Sensor(INPUT_1,address=rc.Address.IR_360)
-		self.Port['2'] = Sensor(INPUT_2,driver_name=rc.Driver.COMPASS)
+		# self.Port['2'] = Sensor(INPUT_2,driver_name=rc.Driver.COMPASS)
 
-		self.Port['3'] = UltrasonicSensor(INPUT_3)
+		# self.Port['3'] = UltrasonicSensor(INPUT_3)
 
 	def init_variables(self):
 		"""Create useful variables"""
@@ -69,8 +73,8 @@ class SoccerRobot(rc.Robot):
 		self.ResetMotors()
 
 		# Reset Variables
-		self.goal_heading = self.Port['2'].read()
-		self.center_distance = self.Port['3'].distance_centimeters
+		# self.goal_heading = self.Port['2'].read()
+		# self.center_distance = self.Port['3'].distance_centimeters
 
 		# Set sound volume
 		self.Sound.set_volume(self.sound_volume)
@@ -92,10 +96,10 @@ class SoccerRobot(rc.Robot):
 		angle = math.radians(angle)
 
 		# Math stuff
-		front_left =  1 * math.cos(math.pi / 4 - angle)
-		front_right = -1 * math.cos(math.pi / 4 + angle)
-		back_left =  1 * math.cos(math.pi / 4 + angle)
-		back_right = -1 * math.cos(math.pi / 4 - angle)
+		front_left =  -1 * math.cos(math.pi / 4 - angle)
+		front_right = 1 * math.cos(math.pi / 4 + angle)
+		back_left =  -1 * math.cos(math.pi / 4 + angle)
+		back_right = 1 * math.cos(math.pi / 4 - angle)
 
 		# Returns the speeds in [A,B,C,D] form
 		return [
@@ -104,6 +108,21 @@ class SoccerRobot(rc.Robot):
 			front_left,		# Motor C
 			back_left		# Motor D
 		]
+
+	def SmoothAngle(self,current,target):
+		smoothing = 1.25
+
+		diff = abs(current - target)
+		if diff > 270: diff -= 270
+
+		diff /= smoothing
+
+		if current - smoothing / 2 < target: 
+			return current + diff
+		elif current + smoothing / 2 > target: 
+			return current - diff
+
+		return current
 
 	def FixBallAngle(self,ball_angle:int) -> int:
 		"""Convert IR angle to 360 degrees"""
@@ -128,25 +147,27 @@ class SoccerRobot(rc.Robot):
 			if self.Buttons.enter or self.Buttons.backspace: break
 
 			# Read 360 infrared sensor bin data in bytes form
-			raw_ir = self.Port['1'].bin_data('<b')
+			raw_ir = [self.bus.read_i2c_block_data(0x08, i, 2) for i in range(0, 12)]
+
+			all_angles = [value for value in raw_ir[0] if value < 13]
 
 			# Unpack data
-			ball_angle, ball_strength = raw_ir
+			ball_angle, ball_strength = max(set(all_angles), key = all_angles.count), max(set(raw_ir[1]), key = raw_ir[1].count)
 
 			# Get our target angle (towards the ball)
 			target_angle = self.FixBallAngle(ball_angle)
 
+			# Update our current angle
+			current_angle = self.SmoothAngle(current_angle,target_angle)
+
 			# Calculate the 4 motor speeds
-			motor_calc = self.CalculateMotors(target_angle)
+			motor_calc = self.CalculateMotors(current_angle)
 
 			# Scale the 4 speeds to our target speed
 			scaled_speeds = self.ScaleSpeeds(current_speed,motor_calc)
 
 			# Run the motors at desired speeds
-			self.StartMotors(scaled_speeds)
-
-			# Update our current angle
-			current_angle = target_angle
+			self.StartMotors(scaled_speeds)	
 
 			# Debugging stuff
 			print("\nBall Angle:",ball_angle)
@@ -162,6 +183,9 @@ class SoccerRobot(rc.Robot):
 
 		# Run the menu
 		self.menu.Run()
+
+		# Close I2C Bus
+		self.bus.close()
 
 		# Once finished reset motors and change color back to green
 		self.CoastMotors()
