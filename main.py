@@ -4,87 +4,157 @@ import RoboCup as rc
 from RoboCup.Menu import Menu, MenuButton
 
 from ev3dev2.motor import *
+from ev3dev2.sensor import *
+from ev3dev2.sensor.lego import *
 
 import math
 from time import sleep
 
 class SoccerRobot(rc.Robot):
-    def __init__(self):
-        super().__init__()
+	def __init__(self):
+		"""What our class does when created (initialised)"""
 
-        self.menu_buttons = [
-            MenuButton("Run Program",script=self.RunProgram),
-            MenuButton("Calibrate",script=self.calibrate),
-            MenuButton("Connect Bluetooth"),
-            MenuButton("Exit",script=self.close_menu),
-        ]
+		# Initialise rc.Robot class
+		super().__init__() 
 
-        self.menu = Menu([2,2],self.menu_buttons)
+		# Define all our buttons and functions
+		self.menu_buttons = [
+			MenuButton("Run Program",script=self.RunProgram),
+			MenuButton("Calibrate",script=self.calibrate),
+			MenuButton("Connect Bluetooth"),
+			MenuButton("Exit",script=self.close_menu),
+		]
 
-        self.x, self.y = 0,0
+		# Create Menu Class
+		self.menu = Menu([2,2],self.menu_buttons)
 
-        self.init_ports()
-        self.calibrate()
+		# Setup our robot stuff
+		self.init_ports()
+		self.init_variables()
+		self.calibrate()
 
-    def init_ports(self):
-        self.Port['A'] = MediumMotor(OUTPUT_A)
-        self.Port['B'] = MediumMotor(OUTPUT_B)
-        self.Port['C'] = MediumMotor(OUTPUT_C)
-        self.Port['D'] = MediumMotor(OUTPUT_D)
+	def init_ports(self):
+		"""Initialise all motors and sensors"""
 
-    def calibrate(self,initiating=False):
-        self.Color('orange')
+		self.Port['A'] = MediumMotor(OUTPUT_A)
+		self.Port['B'] = MediumMotor(OUTPUT_B)
+		self.Port['C'] = MediumMotor(OUTPUT_C)
+		self.Port['D'] = MediumMotor(OUTPUT_D)
 
-        self.ResetMotors()
+		self.Port['1'] = Sensor(INPUT_1,address=rc.Address.IR_360)
+		self.Port['2'] = Sensor(INPUT_2,driver_name=rc.Driver.COMPASS)
 
-        self.Sound.set_volume(20)
+		self.Port['3'] = UltrasonicSensor(INPUT_3)
 
-        self.Sound.play_tone(650,0.3,0,20,self.Sound.PLAY_NO_WAIT_FOR_COMPLETE)
+	def init_variables(self):
+		"""Create useful variables"""
 
-        self.Color('green')
+		self.goal_heading = 0
+		self.center_distance = 0
 
-    def close_menu(self):
-        raise KeyboardInterrupt
+		self.max_speed = 80
+		self.min_speed = 30
 
-    def CalculateMotors(self,angle:float) -> list:
-        angle = math.radians(angle)
+	def calibrate(self,initiating=False):
+		"""Calibrate all sensors, Reset motor positions and read goal heading + wall distance"""
+		self.Color('orange')
 
-        fl =  1 * math.cos(math.pi / 4 - angle)
-        fr = -1 * math.cos(math.pi / 4 + angle)
-        bl =  1 * math.cos(math.pi / 4 + angle)
-        br = -1 * math.cos(math.pi / 4 - angle)
+		#######################################
 
-        return [fr,br,fl,bl]
+		self.ResetMotors()
 
-    def RunProgram(self):
-        self.Color('red')
+		self.goal_heading = self.Port['2'].read()
+		self.center_distance = self.Port['3'].distance_centimeters
 
-        angle = 0
-        speed = 100
-        increment = 3
+		#######################################
 
-        while True:
-            self.Buttons.process()
+		self.Sound.set_volume(20)
 
-            if self.Buttons.enter: break
+		self.Sound.play_tone(650,0.3,0,20,self.Sound.PLAY_NO_WAIT_FOR_COMPLETE)
 
-            angle += increment
+		self.Color('green')
 
-            speeds = self.CalculateMotors(angle)
+	def close_menu(self):
+		"""Close program"""
+		raise KeyboardInterrupt
 
-            scaled_speeds = self.ScaleSpeeds(self.Speed.Clamp(speed),speeds)
+	def CalculateMotors(self,angle:float) -> list:
+		"""Calculate 4 Motor speeds from an angle"""
+		angle = math.radians(angle)
 
-            self.StartMotors(scaled_speeds)
+		# Math stuff
+		front_left =  1 * math.cos(math.pi / 4 - angle)
+		front_right = -1 * math.cos(math.pi / 4 + angle)
+		back_left =  1 * math.cos(math.pi / 4 + angle)
+		back_right = -1 * math.cos(math.pi / 4 - angle)
 
-        self.CoastMotors()
-        self.Color('green')
+		# Returns the speeds in [A,B,C,D] form
+		return [
+			front_right,
+			back_right,
+			front_left,
+			back_left
+		]
 
-    def Begin(self):
-        self.menu.Run()
+	def FixBallAngle(self,ball_angle:int) -> int:
+		"""Convert IR angle to 360 degrees"""
+		return ball_angle * (360/12)
 
-        self.CoastMotors()
-        self.Color('green')
+	def RunProgram(self):
+		"""Main loop"""
 
+		# Change brick color to red
+		self.Color('red')
+
+		target_angle = 0
+
+		current_angle = target_angle
+		current_speed = self.max_speed
+
+		while True:
+			# Update button variables
+			self.Buttons.process()
+
+			# Stop program if middle or exit button pressed
+			if self.Buttons.enter or self.Buttons.backspace: break
+
+			# Read 360 infrared sensor data
+			raw_ir = self.Port['1'].read()
+
+			# Unpack data
+			ball_angle, ball_strength = raw_ir
+
+			# Get our target angle (towards the ball)
+			target_angle = self.FixBallAngle(ball_angle)
+
+			# Calculate the 4 motor speeds
+			motor_calc = self.CalculateMotors(target_angle)
+
+			# Scale the 4 speeds to our target speed
+			scaled_speeds = self.ScaleSpeeds(current_speed,motor_calc)
+
+			# Run the motors at desired speeds
+			self.StartMotors(scaled_speeds)
+
+			# Update our current angle
+			current_angle = target_angle
+
+			# Debugging stuff
+			print("\nBall Angle:",ball_angle)
+			print("Ball Strength:",ball_strength)
+			print("Fixed Angle",target_angle)
+
+		self.CoastMotors()
+		self.Color('green')
+
+	def Begin(self):
+		"""Run the menu. Once finished reset motors and change color back to green"""
+		self.menu.Run()
+
+		self.CoastMotors()
+		self.Color('green')
+
+# If the program is started run the code
 if __name__ == '__main__':
-    robot = SoccerRobot()
-    robot.Begin()
+	robot = SoccerRobot()
+	robot.Begin()
