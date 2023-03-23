@@ -175,7 +175,7 @@ class Robot():
 				self.Port[p].on(SpeedPercent(self.Speed.Clamp(speeds[0])))
 				if len(speeds) > 1: speeds.pop(0)
 
-	def SmoothAngle(self, current:float, target:float, smoothing:float = 0.5, min_angle:float = 5):
+	def SmoothAngle(self, current:float, target:float, smoothing:float = 0.5, min_speed:float = 3):
 		"""Smooth the transition from 2 angles"""
 
 		diff = current - target
