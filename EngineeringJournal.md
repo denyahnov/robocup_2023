@@ -55,6 +55,8 @@ Because of the limited time working on the robot in person, we began testing out
 
 We use 4 motors with omniwheels positioned around the robot to form an X-drive (holonomic), which allows the robot to move in any direction rather than 2. We use omniwheels that are completely legal since they are built from LEGO pieces. Our design is quite unqiue as the motors are stacked on top of each other to reduce the space consumed by them. We then use gear trains to align the wheel shafts in a perfect X.
 
+<img src="https://user-images.githubusercontent.com/60083582/227100512-e9f32a52-ba2e-4808-a4f3-4d94c4be7d3c.png" width="300" height="300" />
+
 This year, we challenged ourselves by using a [BBR IRSeeker](https://irseeker.buildingblockrobotics.com/) which allowed us to have 360 degree infrared vision with just 1 EV3 port used. We had no previous experience using these sensors and built our [own wrapper](https://github.com/denyahnov/ir-seeker) based on limited online documentation for easy use of the sensor.
 
 We use the compass for reading our angle which is used in straightening ourselves as well as curving at the opponent goal. We use an  Ultrasonic positioned on the side of our robots to read our position on the field horizontally. This helps the robot figure out where it is on the field at all times.
