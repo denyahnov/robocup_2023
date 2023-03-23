@@ -1,0 +1,116 @@
+# `NOT FINISHED YET!`
+# Menacing Monkeys
+## Soccer Standard - *2023 RoboCup Junior Australia*
+
+<img src="https://user-images.githubusercontent.com/60083582/227090580-5c1e3e4b-3019-415a-8782-f7282df9f62e.png" width="360" height="360" />
+
+### **Contents:**
+- [Introduction](https://github.com/denyahnov/robocup_2023/blob/main/EngineeringJournal.md#introduction)
+- [Strategy](https://github.com/denyahnov/robocup_2023/blob/main/EngineeringJournal.md#strategy)
+	- Game
+	- Building
+	- Robot Logic
+- [Robot Design](https://github.com/denyahnov/robocup_2023/blob/main/EngineeringJournal.md#robot-design)
+- [Robot Code](https://github.com/denyahnov/robocup_2023/blob/main/EngineeringJournal.md#robot-code)
+- [Photos](https://github.com/denyahnov/robocup_2023/blob/main/EngineeringJournal.md#photos)
+	- Last Year's Designs
+	- New Prototypes
+	- Final Design
+
+### **Introduction:**
+
+We are Dennis and Saum, a group of year 10s from Melbourne High School. We are a small team of 2 and operate on a weekly basis. We have a variety of experience in various robotics competitions and have competed in RoboCup before.
+
+### **Strategy:**
+**Game:**
+Our strategy for this competition was to try get ball possession as quickly as possible after a ball reset throughout the matches as we found that getting to the ball quick enough and to push it into our opponents direction was enough to gain an advantage in matches. We chose to run 2 robots with the same design, opting out of using a designated 'goalie'. This was partly due to the previously stated decision, but also because we chose to use inter-robot communication. The ability for the robots to relay information like ball possession would allow them to play defense/offense completely autonomously, without the need of specific roles.
+
+![Soccer Field](https://user-images.githubusercontent.com/60083582/185514513-ba5dd76e-ddfc-4a0a-9a91-03beb1630f51.png)
+
+**Building:**
+We found that while powerful robots are good, we wanted a quick robot than could out-manuever the other team. Because of this, our Robots were designed for speed. The choice to use EV3 Medium Motors for our drivebase was a result of this consideration, as we found that the heavier and larger motors are quite bulky and hard to build a solid design with. Here are some of the [prototypes](https://github.com/denyahnov/robocup_2023/blob/main/EngineeringJournal.md#photos) we designed. We learnt new things and improved the robot with every iteration of the design.
+
+**Robot Logic:**
+```mermaid
+graph LR
+Attacking[Attacking?] -- No --> Aim(Aim at '0' degrees)
+HasBall[Has Ball?] -- No --> TeammateBall[Teammate Has Ball?]
+TeammateBall -- Yes --> Defend((Defend))
+Defend --> SlowDown(Ramp Speed Down) --> CenterRobot(Center the Robot) --> Reverse(Reverse Into Goal)
+TeammateBall -- No --> CheckSensors(Check sensor readings)
+HasBall -- Yes --> Attack((Attack))
+Attack --> AimGoal(Curve towards opponent Goal) --> RampSpeed(Ramp Speed Up)
+CheckSensors --> BallPos[Ball Position?]
+BallPos-- Not Found --> Defend
+BallPos-- Found --> Neutral((Neutral)) --> NeutralSpeed(Neutral Speed) --> GoToBall(Go Towards Ball)
+Connected[Robots Connected?] -- Yes --> A(Send Robot Information)
+A --> B(Receive Teammate Information)
+B --> C(Process Information)
+C --> A
+```
+### **Robot Design:**
+Our design choices for this competition were to use 2 identical robots with 4 EV3 Medium Motors, 1 BBR 360 IRSeeker, 1 I2C Compass Sensor and an EV3 Ultrasonic Sensor. We decided that the identity between robots would help resolve issues and keep code as similar as possible. 
+
+Because of the limited time working on the robot in person, we began testing out with [different robot designs](https://github.com/denyahnov/robocup_2023/blob/main/EngineeringJournal.md#photos) using parts from home or [Studio 2.0](https://www.bricklink.com/v2/build/studio.page), a virtual LEGO builder.
+
+We use 4 motors with omniwheels positioned around the robot to form an X-drive (holonomic), which allows the robot to move in any direction rather than 2. We use omniwheels that are completely legal since they are built from LEGO pieces. Our design is quite unqiue as the motors are stacked on top of each other to reduce the space consumed by them. We then use gear trains to align the wheel shafts in a perfect X.
+
+<img src="https://user-images.githubusercontent.com/60083582/227100512-e9f32a52-ba2e-4808-a4f3-4d94c4be7d3c.png" width="300" height="300" />
+
+This year, we challenged ourselves by using a [BBR IRSeeker](https://irseeker.buildingblockrobotics.com/) which allowed us to have 360 degree infrared vision with just 1 EV3 port used. We had no previous experience using these sensors and built our [own wrapper](https://github.com/denyahnov/ir-seeker) based on limited online documentation for easy use of the sensor.
+
+We use the compass for reading our angle which is used in straightening ourselves as well as curving at the opponent goal. We use an  Ultrasonic positioned on the side of our robots to read our position on the field horizontally. This helps the robot figure out where it is on the field at all times.
+
+| **Motor**         |  **Pros**                     |  **Cons**                           |
+|------------------ | ----------------------------- | ------------------------------------|
+| EV3 Medium Motor  |  Fast, Lightweight, Small     |  Weaker, Need Geartrain for X-Drive |
+| EV3 Large Motor   |  Strong, Easy to Incorporate  |  Slower, Bulkier, Heavier           |
+
+### **Robot Code:**
+Our robots are coded in [Python](https://www.python.org/) language using the [ev3dev](https://www.ev3dev.org/) library. All our code is publicly available on our [GitHub repository](https://github.com/denyahnov/robocup_2023/). 
+
+We built our own wrappers for [ev3dev](https://github.com/denyahnov/robocup_tools) and the [infrared sensor](https://github.com/denyahnov/ir-seeker). These allowed us to have Custom Menus and ready to use Classes which sped up our coding process.
+
+We run the main chunk of our code in a single main loop, which uses utilities and functions from our main robot class. We use a seperate thread for bluetooth communication, allowing for it to run simultaneousy with the main code. We started off by using [EV3Sim](https://ev3sim.mhsrobotics.club/), an application developed by the school to practice coding in a virtual environment. It helped us build the foundation of our code while working from home.
+
+We use a holonomic drive which allows us to move in any direction. We use a simple formula to calculate each motor's speed based on a given angle from 0-360 degrees. 
+
+![Holonomic Logic](https://user-images.githubusercontent.com/60083582/227095958-4d676bfd-1925-47ca-b222-6488c20c24c1.png)
+
+Our code accounts for robot inconsistency and faulty sensors. The main chunk of logic stays the same but small functions like converting ball position to robot direction has configurable variables that shift between robots. We use algorithms to average our Ultrasonic sensor values remove outliers, excluding any extremely rapid increases/decreases in value as to account for objects blocking the ultrasonic.
+
+We use bluetooth for communication between robots. We have one robot run as a server and the other connects afterwards as a client. The robots relay whatever information they recieve between themselves e.g. Ball Possession, Current Attack/Defense State, etc.
+
+We do not use any sensors like touch or colour to detect if the robot has possession of the ball, instead we use the infrared proximity.
+
+We even played with using odometry to locate our robot on the field without the use of sensors. By using the motor degree positions, we could estimate where we were on the field given we calibrate before the match begins. Unfortunately, we found that refrees picking our robots up and robot being knocked over would ruin the data, providing an inaccurate location.
+
+We use a cubic function to correct our turning angle based on how far we are from a target angle.
+
+![CompassFix](https://user-images.githubusercontent.com/60083582/227074173-46f1c8af-d7eb-4157-b3d9-9cbd1b7b24a6.png)
+
+```mermaid
+graph LR
+input[Sensor Input] -- Infrared --> IrInput(Return value from 0-11)
+input -- Compass --> cInput[Compass value?]
+cInput -- 3-179 --> left(Curve left)
+cInput -- 180-356 --> right(Curve Right)
+cInput -- Else --> straight(Do nothing)
+right --> formula(Curve speed = angle from '0')
+left --> formula
+input -- Ultrasonic --> question[Greater than 20cm change from average of previous values?]
+question -- Yes --> dont(Do nothing)
+question -- No --> do(Append value to previous values)
+do --> remove(Remove last value in list)
+dont --> returnUltrasonic(Return list)
+remove--> returnUltrasonic
+```
+
+![IrSensorValues](https://user-images.githubusercontent.com/60083582/185833817-af29420e-4e08-4fae-9abd-7d05557f1ff4.png)
+![CompassValue](https://user-images.githubusercontent.com/60083582/186033284-3bef35e7-2be7-4249-83a1-fac46f4491df.png)
+
+### **Photos:**
+**Prototypes:**
+
+![First Prototype](https://media.discordapp.net/attachments/496240143494021120/939835121182330930/SoccerV2.png?width=210&height=270)
+![Second Prototype](https://media.discordapp.net/attachments/516360486963380226/946962209639112735/UpdatedSoccerRobotRENDER.png?width=200&height=270)
