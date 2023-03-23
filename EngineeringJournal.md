@@ -77,6 +77,8 @@ We use bluetooth for communication between robots. We have one robot run as a se
 
 We do not use any sensors like touch or colour to detect if the robot has possession of the ball, instead we use the infrared proximity.
 
+We even played with using odometry to locate our robot on the field without the use of sensors. By using the motor degree positions, we could estimate where we were on the field given we calibrate before the match begins. Unfortunately, we found that refrees picking our robots up and robot being knocked over would ruin the data, providing an inaccurate location.
+
 ![CompassFix](https://user-images.githubusercontent.com/60083582/227074173-46f1c8af-d7eb-4157-b3d9-9cbd1b7b24a6.png)
 
 ```mermaid
