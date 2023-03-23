@@ -87,6 +87,10 @@ class SoccerRobot(rc.Robot):
 		"""Close program"""
 		raise KeyboardInterrupt
 
+	def Turn(self,motors:list,speed:float) -> list:
+		"""Turn our robot at a certain speed"""
+		return [motor + speed for motor in motors]
+
 	def CalculateMotors(self,angle:float) -> list:
 		"""Calculate 4 Motor speeds from an angle"""
 		angle = math.radians(angle)
@@ -105,19 +109,14 @@ class SoccerRobot(rc.Robot):
 			back_left		# Motor D
 		]
 
-	def SmoothAngle(self, current, target, smoothing = 0.5, min_speed = 5):
-		"""Smooth the transition from 2 angles"""
+	def PointTo(self,target:float,current:float) -> float:
+		"""Turn until we reach the target"""
 
-		diff = current - target
+		# Calculation Graph: https://imgur.com/a/ZVlpOnj
 
-		while diff < -180: diff += 360
-		while diff > 180: diff -= 360
+		difference = target - current
 
-		increase = abs(diff) * smoothing
-
-		rtn = target - increase
-
-		return rtn if rtn > min_speed else target
+		return self.Speed.Clamp( ( pow(difference / 8, 3) / 3) - difference )
 
 	def FixBallAngle(self,ball_angle:int) -> int:
 		"""Convert IR angle to 360 degrees"""
@@ -156,8 +155,14 @@ class SoccerRobot(rc.Robot):
 			# Scale the 4 speeds to our target speed
 			scaled_speeds = self.ScaleSpeeds(current_speed,motor_calc)
 
+			# Calculate our goal heading curve
+			compass_fix = self.PointTo(self.goal_heading, self.Port['2'].value())
+
+			# Turn to goal
+			curved_speeds = self.Turn(scaled_speeds, compass_fix)
+
 			# Run the motors at desired speeds
-			self.StartMotors(scaled_speeds)	
+			self.StartMotors(curved_speeds)	
 
 			# Debugging stuff
 			print("\nBall Angle:",ball_angle)

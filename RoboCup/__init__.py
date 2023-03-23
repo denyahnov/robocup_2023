@@ -20,9 +20,6 @@ class Driver:
 	IR = "ht-nxt-ir-seek-v2"
 	COMPASS = "ht-nxt-compass"
 
-class Address:
-	IR_360 = "ev3:in1:i2c8"
-
 def Unpack(values) -> list:
 	for item in values:
 		try:
@@ -178,18 +175,19 @@ class Robot():
 				self.Port[p].on(SpeedPercent(self.Speed.Clamp(speeds[0])))
 				if len(speeds) > 1: speeds.pop(0)
 
-	def SmoothAngle(self,current: float,target: float,smoothing: float=1.25) -> float:
-		diff = abs(current - target)
-		if diff > 270: diff -= 270
+	def SmoothAngle(self, current:float, target:float, smoothing:float = 0.5, min_angle:float = 5):
+		"""Smooth the transition from 2 angles"""
 
-		diff /= smoothing
+		diff = current - target
 
-		if current - smoothing / 2 < target: 
-		    return current + diff
-		elif current + smoothing / 2 > target: 
-		    return current - diff
+		while diff < -180: diff += 360
+		while diff > 180: diff -= 360
 
-		return current
+		increase = abs(diff) * smoothing
+
+		rtn = target - increase
+
+		return rtn if rtn > min_speed else target
 
 def ExampleProject() -> None:
 	with open("Demo_RoboCup.py","w+") as file:
