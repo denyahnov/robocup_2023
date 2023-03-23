@@ -22,7 +22,7 @@ class SoccerRobot(rc.Robot):
 		self.menu_buttons = [
 			MenuButton("Run Program",script=self.RunProgram),
 			MenuButton("Calibrate",script=self.calibrate),
-			MenuButton("Connect Bluetooth"),
+			MenuButton("Do Circle",script=self.CircleTest),
 			MenuButton("Exit",script=self.close_menu),
 		]
 
@@ -121,6 +121,58 @@ class SoccerRobot(rc.Robot):
 	def FixBallAngle(self,ball_angle:int) -> int:
 		"""Convert IR angle to 360 degrees"""
 		return ball_angle * (360/12)
+
+	def CircleTest(self):
+		"""Drive in a circle"""
+
+		# Change brick color to red
+		self.Color('red')
+
+		target_angle = 0
+
+		current_angle = target_angle
+		current_speed = self.max_speed
+
+		while True:
+			# Update button variables
+			self.Buttons.process()
+
+			# Stop program if middle or exit button pressed
+			if self.Buttons.enter or self.Buttons.backspace: break
+
+			# Unpack IR data
+			ball_angle, ball_strength = self.Port['1'].read()
+
+			# Get our target angle (towards the ball)
+			# target_angle = self.FixBallAngle(ball_angle)
+
+			# Update our current angle
+			current_angle = self.SmoothAngle(current_angle,target_angle)
+
+			# Calculate the 4 motor speeds
+			motor_calc = self.CalculateMotors(current_angle)
+
+			# Scale the 4 speeds to our target speed
+			scaled_speeds = self.ScaleSpeeds(current_speed,motor_calc)
+
+			# # Calculate our goal heading curve
+			# compass_fix = self.PointTo(self.goal_heading, self.Port['2'].value())
+
+			# # Turn to goal
+			# curved_speeds = self.Turn(scaled_speeds, compass_fix)
+
+			# Run the motors at desired speeds
+			self.StartMotors(scaled_speeds)	
+
+			# Debugging stuff
+			print("\nBall Angle:",ball_angle)
+			print("Ball Strength:",ball_strength)
+			print("Fixed Angle",target_angle)
+
+		# Stop motors and reset brick color 
+		self.CoastMotors()
+		self.Color('green')
+
 
 	def RunProgram(self):
 		"""Main loop"""
