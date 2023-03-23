@@ -2,17 +2,17 @@
 # Menacing Monkeys
 ## Soccer Standard - *2023 RoboCup Junior Australia*
 
-![MonkeyMadnessSmall](https://user-images.githubusercontent.com/60083582/185514677-70e94f78-bb10-4946-b1b8-a40c2645fdb7.png)
+<img src="https://user-images.githubusercontent.com/60083582/227090580-5c1e3e4b-3019-415a-8782-f7282df9f62e.png" width="360" height="360" />
 
 ### **Contents:**
-- [Introduction](https://github.com/denyahnov/rc2022/blob/main/EngineeringNotebook.md#introduction)
-- [Strategy](https://github.com/denyahnov/rc2022/blob/main/EngineeringNotebook.md#strategy)
+- [Introduction](https://github.com/denyahnov/robocup_2023/blob/main/EngineeringJournal.md#introduction)
+- [Strategy](https://github.com/denyahnov/robocup_2023/blob/main/EngineeringJournal.md#strategy)
 	- Game
 	- Building
 	- Robot Logic
-- [Robot Design](https://github.com/denyahnov/rc2022/blob/main/EngineeringNotebook.md#robot-design)
-- [Robot Code](https://github.com/denyahnov/rc2022/blob/main/EngineeringNotebook.md#robot-code)
-- [Photos](https://github.com/denyahnov/rc2022/blob/main/EngineeringNotebook.md#photos)
+- [Robot Design](https://github.com/denyahnov/robocup_2023/blob/main/EngineeringJournal.md#robot-design)
+- [Robot Code](https://github.com/denyahnov/robocup_2023/blob/main/EngineeringJournal.md#robot-code)
+- [Photos](https://github.com/denyahnov/robocup_2023/blob/main/EngineeringJournal.md#photos)
 	- Prototypes
 
 ### **Introduction:**
@@ -30,7 +30,7 @@ Our strategy for this competition was to try hold ball possession for as long as
 ![Soccer Field](https://user-images.githubusercontent.com/60083582/185514513-ba5dd76e-ddfc-4a0a-9a91-03beb1630f51.png)
 
 **Building:**
-We found that while powerful robots are good, we wanted a quick robot than could out-manuever the other team. Because of this, our Robots were designed for speed. The choice to use EV3 Medium Motors for our drivebase was a result of this consideration, as we found that the heavier and larger motors are quite bulky and hard to build a solid design with. We chose the smaller EV3 Medium Motors, which are favorable for many other teams aswell. Here are some of the [prototypes](https://github.com/denyahnov/rc2022/blob/main/EngineeringNotebook.md#photos) we designed. We learnt new things and improved the robot with every iteration of the design.
+We found that while powerful robots are good, we wanted a quick robot than could out-manuever the other team. Because of this, our Robots were designed for speed. The choice to use EV3 Medium Motors for our drivebase was a result of this consideration, as we found that the heavier and larger motors are quite bulky and hard to build a solid design with. We chose the smaller EV3 Medium Motors, which are favorable for many other teams aswell. Here are some of the [prototypes](https://github.com/denyahnov/robocup_2023/blob/main/EngineeringJournal.md#photos) we designed. We learnt new things and improved the robot with every iteration of the design.
 
 **Robot Logic:**
 ```mermaid
@@ -53,7 +53,7 @@ C --> A
 ### **Robot Design:**
 Our design choices for this competition were to use 2 identical robots with 4 EV3 Large Motors, 2 I2C Infrared Sensors, 1 I2C Compass Sensor and an EV3 Ultrasonic Sensor. We decided that the identity between robots would help resolve issues and keep code as similar as possible. 
 
-Because of the limited time working on the robot in person, we began testing out with [different robot designs](https://github.com/denyahnov/rc2022/blob/main/EngineeringNotebook.md#photos) using parts from home or [Studio 2.0](https://www.bricklink.com/v2/build/studio.page), a virtual LEGO builder.
+Because of the limited time working on the robot in person, we began testing out with [different robot designs](https://github.com/denyahnov/robocup_2023/blob/main/EngineeringJournal.md#photos) using parts from home or [Studio 2.0](https://www.bricklink.com/v2/build/studio.page), a virtual LEGO builder.
 
 We use 4 motors with omniwheels positioned around the robot to form an X-drive, which allows the robot to move in 8 directions rather than 2. We use omniwheels that are completely legal since they are built from LEGO pieces
 
@@ -65,7 +65,7 @@ We decided to use 2 Infrared sensors positioned opposite each other to provide 3
 | EV3 Large Motor   |  Strong, Easy to Incorporate  |  Slower, Bulkier, Heavier           |
 
 ### **Robot Code:**
-Our robots are coded in [Python](https://www.python.org/) language using the [ev3dev](https://www.ev3dev.org/) library. All our code is publicly available on our [GitHub repository](https://github.com/denyahnov/rc2022/). 
+Our robots are coded in [Python](https://www.python.org/) language using the [ev3dev](https://www.ev3dev.org/) library. All our code is publicly available on our [GitHub repository](https://github.com/denyahnov/robocup_2023/). 
 
 We run the main chunk of our code in a single main loop, which uses utilities and functions from other files. We use a seperate thread for bluetooth communication, allowing for it to run simultaneousy with the main code. We started off by using [EV3Sim](https://ev3sim.mhsrobotics.club/), an application developed by the school to practice coding in a virtual environment. It helped us build the foundation of our code while working from home.
 
