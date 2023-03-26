@@ -10,6 +10,7 @@ from ev3dev2.sensor.lego import *
 
 import math
 from time import sleep
+from json import load,dump
 
 class SoccerRobot(rc.Robot):
 	def __init__(self):
@@ -32,7 +33,9 @@ class SoccerRobot(rc.Robot):
 		# Setup our robot stuff
 		self.init_ports()
 		self.init_variables()
-		self.calibrate()
+
+		# Load our calibration data
+		self.read_calibration()
 
 	def init_ports(self):
 		"""Initialise all motors and sensors"""
@@ -46,6 +49,8 @@ class SoccerRobot(rc.Robot):
 		self.Port['2'] = Sensor(INPUT_2,driver_name=rc.Driver.COMPASS)
 		# self.Port['3'] = UltrasonicSensor(INPUT_3)
 
+		self.Port['2'].mode = "COMPASS"
+
 	def init_variables(self):
 		"""Create useful variables"""
 
@@ -56,6 +61,27 @@ class SoccerRobot(rc.Robot):
 		self.min_speed = 30
 
 		self.sound_volume = 20
+
+	def save_calibration(self):
+		"""Save calibration data"""
+		with open("calibration.json",'w') as file:
+			dump({
+				"goal_heading": self.goal_heading,
+				"center_distance": self.center_distance,
+			},file)
+
+	def read_calibration(self):
+		"""Load calibration data"""
+		try:
+			with open("calibration.json",'r') as file:
+				temp = load(file)
+
+				self.goal_heading = temp["goal_heading"]
+				self.center_distance = temp["center_distance"]
+
+				del temp
+		except FileNotFoundError:
+			save_calibration()
 
 	def calibrate(self,initiating=False):
 		"""Calibrate all sensors, Reset motor positions and read goal heading + wall distance"""
@@ -69,13 +95,16 @@ class SoccerRobot(rc.Robot):
 		self.ResetMotors()
 
 		# Reset Variables
-		# self.goal_heading = self.Port['2'].read()
+		# self.goal_heading = self.Port['2'].read()de
 		# self.center_distance = self.Port['3'].distance_centimeters
 
 		# Set sound volume
 		self.Sound.set_volume(self.sound_volume)
 
 		#######################################
+
+		# Save the data to json file
+		self.save_calibration()
 
 		# Play beep to indicate calibration finished
 		self.Sound.play_tone(650,0.3,0,20,self.Sound.PLAY_NO_WAIT_FOR_COMPLETE)
