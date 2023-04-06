@@ -114,7 +114,11 @@ remove--> returnUltrasonic
 ![CompassValue](https://user-images.githubusercontent.com/60083582/186033284-3bef35e7-2be7-4249-83a1-fac46f4491df.png)
 
 ### **Photos:**
-**Prototypes:**
+**Last year's designs:**
 
 ![First Prototype](https://media.discordapp.net/attachments/496240143494021120/939835121182330930/SoccerV2.png?width=210&height=270)
 ![Second Prototype](https://media.discordapp.net/attachments/516360486963380226/946962209639112735/UpdatedSoccerRobotRENDER.png?width=200&height=270)
+
+**New Prototypes:**
+
+<img src="https://user-images.githubusercontent.com/60083582/230256085-a9555cdb-e4b2-482b-9931-5c6ec12b5264.png" width="360" />
