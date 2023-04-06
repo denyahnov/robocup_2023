@@ -121,5 +121,4 @@ remove--> returnUltrasonic
 
 **New Prototypes:**
 
-<img src="https://user-images.githubusercontent.com/60083582/230256085-a9555cdb-e4b2-482b-9931-5c6ec12b5264.png" width="360" /> <img src="https://user-images.githubusercontent.com/60083582/230257456-4955fd23-e41b-432a-8cb7-a6fdf5049263.png" width="360" />
-<img src="https://user-images.githubusercontent.com/60083582/230257264-2f7419bf-bab1-4634-87e6-0409e55ef248.png" width="360" /> <img src="https://user-images.githubusercontent.com/60083582/230257349-0c4ab067-466c-4c03-94e7-0b5d71e42a03.png" width="360" />
+<img src="https://user-images.githubusercontent.com/60083582/230256085-a9555cdb-e4b2-482b-9931-5c6ec12b5264.png" width="360" /> <img src="https://user-images.githubusercontent.com/60083582/230257456-4955fd23-e41b-432a-8cb7-a6fdf5049263.png" width="360" /> <img src="https://user-images.githubusercontent.com/60083582/230257349-0c4ab067-466c-4c03-94e7-0b5d71e42a03.png" width="360" /> <img src="https://user-images.githubusercontent.com/60083582/230257264-2f7419bf-bab1-4634-87e6-0409e55ef248.png" width="360" />
