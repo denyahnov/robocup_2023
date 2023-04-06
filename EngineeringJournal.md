@@ -85,6 +85,10 @@ We do not use any sensors like touch or colour to detect if the robot has posses
 
 We even played with using odometry to locate our robot on the field without the use of sensors. By using the motor degree positions, we could estimate where we were on the field given we calibrate before the match begins. Unfortunately, we found that refrees picking our robots up and robot being knocked over would ruin the data, providing an inaccurate location.
 
+We made an easy way for us to debug code and see sensor values by visualing the robot position. We pass it the ball angle and strength, and it returns out an x,y position.
+
+![RobotPosition](https://user-images.githubusercontent.com/60083582/230255733-2c85afd2-8f82-41af-99da-d7c4d70fbb2c.png)
+
 We use a cubic function to correct our turning angle based on how far we are from a target angle.
 
 ![CompassFix](https://user-images.githubusercontent.com/60083582/227074173-46f1c8af-d7eb-4157-b3d9-9cbd1b7b24a6.png)
