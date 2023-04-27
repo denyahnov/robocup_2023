@@ -187,20 +187,11 @@ class SoccerRobot(rc.Robot):
 			# Get our target angle (towards the ball)
 			target_angle = self.FixBallAngle(ball_angle)
 
-			# Update our current angle
-			# current_angle = self.SmoothAngle(current_angle,target_angle)
-
 			# Calculate the 4 motor speeds
 			motor_calc = self.CalculateMotors(target_angle)
 
 			# Scale the 4 speeds to our target speed
 			scaled_speeds = self.ScaleSpeeds(current_speed,motor_calc)
-
-			# Calculate our goal heading curve
-			# compass_fix = self.PointTo(self.goal_heading, self.Port['2'].value())
-
-			# Turn to goal
-			# curved_speeds = self.Turn(scaled_speeds, compass_fix)
 
 			# Run the motors at desired speeds
 			self.StartMotors(self.Inverse(scaled_speeds))
