@@ -47,7 +47,7 @@ class SoccerRobot(rc.Robot):
 
 		self.Port['1'] = rc.IRSeeker360(INPUT_1)
 		self.Port['2'] = Sensor(INPUT_2,driver_name=rc.Driver.COMPASS)
-		# self.Port['3'] = UltrasonicSensor(INPUT_3)
+		self.Port['3'] = UltrasonicSensor(INPUT_3)
 
 		self.Port['2'].mode = "COMPASS"
 
@@ -96,7 +96,7 @@ class SoccerRobot(rc.Robot):
 
 		# Reset Variables
 		self.goal_heading = self.Port['2'].value()
-		# self.center_distance = self.Port['3'].distance_centimeters
+		self.center_distance = self.Port['3'].distance_centimeters
 
 		# Set sound volume
 		self.Sound.set_volume(self.sound_volume)
@@ -163,10 +163,53 @@ class SoccerRobot(rc.Robot):
 
 		return (distance * math.cos(angle + 90),-distance * math.sin(angle + 90))
 
+	def FieldPosition(self):
+		"""Get robot field position (Left : < 0 , Middle : 0, Right : > 0)"""
+
+		return self.Port['3'].distance_centimeters - self.center_distance
+
 	def Testing(self):
 		"""Testing ENV"""
 
-		pass
+		# Change brick color to red
+		self.Color('red')
+
+		speed = 20
+		angle = 0
+
+		tolerance = 15
+
+		while True:
+			# Update button variables
+			self.Buttons.process()
+
+			# Stop program if middle or exit button pressed
+			if self.Buttons.enter or self.Buttons.backspace: break
+			
+			position = self.FieldPosition()
+
+			angle =  90 if position < -tolerance else 270 if position > tolerance else 0
+
+			# Calculate the 4 motor speeds
+			motor_calc = self.CalculateMotors(angle)
+
+			# Scale the 4 speeds to our target speed
+			scaled_speeds = self.ScaleSpeeds(speed,motor_calc)
+
+			# Calculate our goal heading curve
+			compass_fix = self.PointTo(self.goal_heading - position / 10, self.Port['2'].value())
+
+			# Turn to goal
+			curved_speeds = self.Turn(scaled_speeds, compass_fix)
+
+			print(position / 10)
+
+			# Run the motors at desired speeds
+			self.StartMotors(self.Inverse(curved_speeds) if angle != 0 else [0,0,0,0])
+
+		# Stop motors and reset brick color 
+		self.CoastMotors()
+		self.Color('green')
 
 	def RunProgram(self):
 		"""Main loop"""
@@ -179,6 +222,8 @@ class SoccerRobot(rc.Robot):
 
 		current_angle = target_angle
 		current_speed = self.max_speed
+
+		DEBUG = []
 
 		while True:
 			# Update button variables
@@ -194,6 +239,8 @@ class SoccerRobot(rc.Robot):
 			target_angle = self.FixBallAngle(ball_angle)
 
 			target_scaling = 1 if ball_strength < 60 else 1.75
+
+			position = self.FieldPosition()
 
 			if 5 < target_angle < 180:
 				target_angle *= target_scaling
@@ -211,7 +258,7 @@ class SoccerRobot(rc.Robot):
 			scaled_speeds = self.ScaleSpeeds(current_speed,motor_calc)
 
 			# Calculate our goal heading curve
-			compass_fix = self.PointTo(self.goal_heading, self.Port['2'].value())
+			compass_fix = self.PointTo(self.goal_heading - position / 10, self.Port['2'].value())
 
 			# Turn to goal
 			curved_speeds = self.Turn(scaled_speeds, compass_fix)
@@ -223,6 +270,11 @@ class SoccerRobot(rc.Robot):
 			# print("\nBall Angle:",ball_angle)
 			# print("Ball Strength:",ball_strength)
 			# print("Fixed Angle",target_angle)
+
+			DEBUG.append([curved_speeds, compass_fix, target_angle])
+
+		with open("debug.txt","w") as file:
+			dump(DEBUG,file)
 
 		# Stop motors and reset brick color 
 		self.CoastMotors()
