@@ -217,7 +217,7 @@ class SoccerRobot(rc.Robot):
 			# Get our target angle (towards the ball)
 			target_angle = self.FixBallAngle(ball_angle)
 
-			target_scaling = 1 if ball_strength < 60 else 1.75
+			target_scaling = 1 if ball_strength < 50 else 1.7
 
 			position = self.FieldPosition()
 
@@ -227,7 +227,7 @@ class SoccerRobot(rc.Robot):
 				target_angle = 360 - ( (360 - target_angle) * target_scaling )
 
 			# Update our current angle
-			# current_angle = self.SmoothAngle(current_angle, target_angle, smoothing = 0.75)
+			# current_angle = self.SmoothAngle(current_angle, target_angle, smoothing = 0.9)
 			current_angle = target_angle
 
 			# Calculate the 4 motor speeds
@@ -237,7 +237,8 @@ class SoccerRobot(rc.Robot):
 			scaled_speeds = self.ScaleSpeeds(current_speed,motor_calc)
 
 			# Calculate our goal heading curve
-			compass_fix = self.PointTo(self.goal_heading - position / self.goal_gradient, self.Port['2'].value())
+			curve = position / self.goal_gradient if ball_strength > 60 else 0
+			compass_fix = self.PointTo(self.goal_heading - curve, self.Port['2'].value())
 
 			# Turn to goal
 			curved_speeds = self.Turn(scaled_speeds, compass_fix)
@@ -250,10 +251,10 @@ class SoccerRobot(rc.Robot):
 			# print("Ball Strength:",ball_strength)
 			# print("Fixed Angle",target_angle)
 
-			# DEBUG.append([curved_speeds, compass_fix, target_angle])
+			DEBUG.append([self.FixBallAngle(ball_angle), target_angle, current_angle])
 
-		# with open("debug.txt","w") as file:
-			# dump(DEBUG,file)
+		with open("debug.txt","w") as file:
+			dump(DEBUG,file)
 
 		# Stop motors and reset brick color 
 		self.CoastMotors()
