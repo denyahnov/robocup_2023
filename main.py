@@ -30,12 +30,15 @@ class SoccerRobot(rc.Robot):
 		# Create Menu Class
 		self.menu = Menu([2,2],self.menu_buttons)
 
-		# Setup our robot stuff
-		self.init_ports()
+		# Setup our variables
 		self.init_variables()
 
 		# Load our calibration data
 		self.read_calibration()
+
+		# Setup sensors/motors
+		self.init_ports()
+
 
 	def init_ports(self):
 		"""Initialise all motors and sensors"""
@@ -45,14 +48,24 @@ class SoccerRobot(rc.Robot):
 		self.Port['C'] = MediumMotor(OUTPUT_C)
 		self.Port['D'] = MediumMotor(OUTPUT_D)
 
-		self.Port['1'] = rc.IRSeeker360(INPUT_1)
 		self.Port['2'] = Sensor(INPUT_2,driver_name=rc.Driver.COMPASS)
 		self.Port['3'] = UltrasonicSensor(INPUT_3)
 
 		self.Port['2'].mode = "COMPASS"
 
+
+		if self.robot_id == 0:
+			self.Port['1'] = rc.IRSeeker360(INPUT_1)
+		else:
+			self.Port['1'] = rc.DoubleInfrared(
+				(INPUT_1, 0),
+				(INPUT_4, 180),
+			)
+
 	def init_variables(self):
 		"""Create useful variables"""
+
+		self.robot_id = 0
 
 		self.goal_heading = 0
 		self.center_distance = 0
@@ -60,12 +73,15 @@ class SoccerRobot(rc.Robot):
 		self.max_speed = 90
 		self.min_speed = 30
 
+		self.goal_gradient = 8
+
 		self.sound_volume = 20
 
 	def save_calibration(self):
 		"""Save calibration data"""
 		with open("calibration.json",'w') as file:
 			dump({
+				"robot_id": self.robot_id,
 				"goal_heading": self.goal_heading,
 				"center_distance": self.center_distance,
 			},file,indent=4)
@@ -76,6 +92,7 @@ class SoccerRobot(rc.Robot):
 			with open("calibration.json",'r') as file:
 				temp = load(file)
 
+				self.robot_id = temp["robot_id"]
 				self.goal_heading = temp["goal_heading"]
 				self.center_distance = temp["center_distance"]
 
@@ -171,45 +188,7 @@ class SoccerRobot(rc.Robot):
 	def Testing(self):
 		"""Testing ENV"""
 
-		# Change brick color to red
-		self.Color('red')
-
-		speed = 20
-		angle = 0
-
-		tolerance = 15
-
-		while True:
-			# Update button variables
-			self.Buttons.process()
-
-			# Stop program if middle or exit button pressed
-			if self.Buttons.enter or self.Buttons.backspace: break
-			
-			position = self.FieldPosition()
-
-			angle =  90 if position < -tolerance else 270 if position > tolerance else 0
-
-			# Calculate the 4 motor speeds
-			motor_calc = self.CalculateMotors(angle)
-
-			# Scale the 4 speeds to our target speed
-			scaled_speeds = self.ScaleSpeeds(speed,motor_calc)
-
-			# Calculate our goal heading curve
-			compass_fix = self.PointTo(self.goal_heading - position / 10, self.Port['2'].value())
-
-			# Turn to goal
-			curved_speeds = self.Turn(scaled_speeds, compass_fix)
-
-			print(position / 10)
-
-			# Run the motors at desired speeds
-			self.StartMotors(self.Inverse(curved_speeds) if angle != 0 else [0,0,0,0])
-
-		# Stop motors and reset brick color 
-		self.CoastMotors()
-		self.Color('green')
+		pass
 
 	def RunProgram(self):
 		"""Main loop"""
@@ -258,7 +237,7 @@ class SoccerRobot(rc.Robot):
 			scaled_speeds = self.ScaleSpeeds(current_speed,motor_calc)
 
 			# Calculate our goal heading curve
-			compass_fix = self.PointTo(self.goal_heading - position / 10, self.Port['2'].value())
+			compass_fix = self.PointTo(self.goal_heading - position / self.goal_gradient, self.Port['2'].value())
 
 			# Turn to goal
 			curved_speeds = self.Turn(scaled_speeds, compass_fix)
@@ -271,10 +250,10 @@ class SoccerRobot(rc.Robot):
 			# print("Ball Strength:",ball_strength)
 			# print("Fixed Angle",target_angle)
 
-			DEBUG.append([curved_speeds, compass_fix, target_angle])
+			# DEBUG.append([curved_speeds, compass_fix, target_angle])
 
-		with open("debug.txt","w") as file:
-			dump(DEBUG,file)
+		# with open("debug.txt","w") as file:
+			# dump(DEBUG,file)
 
 		# Stop motors and reset brick color 
 		self.CoastMotors()
