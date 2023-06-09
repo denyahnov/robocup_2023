@@ -128,7 +128,7 @@ class SoccerRobot(rc.Robot):
 		except FileNotFoundError:
 			self.save_calibration()
 
-	def calibrate(self,initiating=False):
+	def calibrate(self):
 		"""Calibrate all sensors, Reset motor positions and read goal heading + wall distance"""
 
 		# Set brick color to orange
@@ -164,6 +164,7 @@ class SoccerRobot(rc.Robot):
 		self.update_debug()
 
 	def update_debug(self):
+		"""Update Debug Button Text"""
 		self.menu_buttons[2].text = f"Debug: {self.debug_mode}"
 
 	def close_menu(self):
@@ -212,10 +213,11 @@ class SoccerRobot(rc.Robot):
 
 		return value if value <= 180 else value - 360
 
-	def CalcDistanceOffset(self,target,angle):
+	def CalcDistanceOffset(self,target:float,angle:int):
+		"""Compensate for Robot angle when reading wall distance"""
 		return target / math.cos(math.radians(angle if abs(angle) <= 50 else 50))
 
-	def FieldPosition(self,angle):
+	def FieldPosition(self,angle:int):
 		"""Get robot field position (Left : < 0 , Middle : 0, Right : > 0)"""
 
 		return self.Port['3'].distance_centimeters - self.CalcDistanceOffset(self.center_distance,angle)
