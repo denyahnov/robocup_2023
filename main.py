@@ -9,8 +9,29 @@ from ev3dev2.sensor import *
 from ev3dev2.sensor.lego import *
 
 import math
-from time import sleep
+from time import sleep,time
 from json import load,dump
+
+class LowPassFilter():
+	SAMPLE_RATE = 20
+
+	def __init__(self,omega_c):
+		self.init_constants(omega_c, 1 / Filter.SAMPLE_RATE)
+
+		self.last_input = 0
+		self.last_output = 0
+
+	def init_constants(self,omega_c, T):
+		self.alpha = (2 - T * omega_c) / (2 + T * omega_c)
+		self.beta = T * omega_c / (2 + T * omega_c)
+
+	def process_sample(x):
+		y = self.alpha * self.last_output + self.beta * (x + self.last_input)
+
+		self.last_input = x
+		self.last_output = y
+
+		return y
 
 class SoccerRobot(rc.Robot):
 	def __init__(self):
@@ -23,7 +44,7 @@ class SoccerRobot(rc.Robot):
 		self.menu_buttons = [
 			MenuButton("Run Program",script=self.RunProgram),
 			MenuButton("Calibrate",script=self.calibrate),
-			MenuButton("Testing",script=self.Testing),
+			MenuButton("Debug: False",script=self.toggle_debug),
 			MenuButton("Exit",script=self.close_menu),
 		]
 
@@ -39,6 +60,8 @@ class SoccerRobot(rc.Robot):
 		# Setup sensors/motors
 		self.init_ports()
 
+		# Update UI to show debug status
+		self.update_debug()
 
 	def init_ports(self):
 		"""Initialise all motors and sensors"""
@@ -62,10 +85,13 @@ class SoccerRobot(rc.Robot):
 				(INPUT_4, 180),
 			)
 
+		self.BallFilter = LowPassFilter(6)
+
 	def init_variables(self):
 		"""Create useful variables"""
 
 		self.robot_id = 0
+		self.debug_mode = False
 
 		self.goal_heading = 0
 		self.center_distance = 0
@@ -82,6 +108,7 @@ class SoccerRobot(rc.Robot):
 		with open("calibration.json",'w') as file:
 			dump({
 				"robot_id": self.robot_id,
+				"debug_mode": self.debug_mode,
 				"goal_heading": self.goal_heading,
 				"center_distance": self.center_distance,
 			},file,indent=4)
@@ -93,6 +120,7 @@ class SoccerRobot(rc.Robot):
 				temp = load(file)
 
 				self.robot_id = temp["robot_id"]
+				self.debug_mode = temp["debug_mode"]
 				self.goal_heading = temp["goal_heading"]
 				self.center_distance = temp["center_distance"]
 
@@ -129,6 +157,15 @@ class SoccerRobot(rc.Robot):
 		# Reset brick color
 		self.Color('green')
 
+	def toggle_debug(self):
+		"""Toggle debug state"""
+		self.debug_mode = not self.debug_mode
+
+		self.update_debug()
+
+	def update_debug(self):
+		self.menu_buttons[2].text = f"Debug: {self.debug_mode}"
+
 	def close_menu(self):
 		"""Close program"""
 		raise KeyboardInterrupt
@@ -158,37 +195,30 @@ class SoccerRobot(rc.Robot):
 	def PointTo(self,target:float,current:float) -> float:
 		"""Turn until we reach the target"""
 
-		return self.Speed.Clamp((self.ConvertCompass(current - target) + 5) / 3)
+		return self.Speed.Clamp((self.ConvertAngle(current - target) + 5) / 3)
 
 	def FixBallAngle(self,ball_angle:int) -> int:
 		"""Convert IR angle to 360 degrees"""
 
-		return ball_angle * (360/12)
+		return ball_angle * 30
 
 	def Inverse(self,motors:list) -> list:
 		"""Inverse certain motors"""
 
 		return [-motors[0],motors[1],motors[2],-motors[3]]
 
-	def ConvertCompass(self,value:float) -> float:
+	def ConvertAngle(self,value:float) -> float:
 		"""Convert 0 to 360 degrees -> -180 to 180 degrees"""
 
 		return value if value <= 180 else value - 360
 
-	def GetRobotPosition(self,angle:float,distance:float) -> tuple:
-		"""Get Robot x,y position relative to the ball at (0,0)"""
+	def CalcDistanceOffset(self,target,angle):
+		return target / math.cos(math.radians(angle if abs(angle) <= 50 else 50))
 
-		return (distance * math.cos(angle + 90),-distance * math.sin(angle + 90))
-
-	def FieldPosition(self):
+	def FieldPosition(self,angle):
 		"""Get robot field position (Left : < 0 , Middle : 0, Right : > 0)"""
 
-		return self.Port['3'].distance_centimeters - self.center_distance
-
-	def Testing(self):
-		"""Testing ENV"""
-
-		pass
+		return self.Port['3'].distance_centimeters - self.CalcDistanceOffset(self.center_distance,angle)
 
 	def RunProgram(self):
 		"""Main loop"""
@@ -211,34 +241,35 @@ class SoccerRobot(rc.Robot):
 			# Stop program if middle or exit button pressed
 			if self.Buttons.enter or self.Buttons.backspace: break
 
+
 			# Unpack IR data
 			ball_angle, ball_strength = self.Port['1'].read()
 
-			# Get our target angle (towards the ball)
-			target_angle = self.FixBallAngle(ball_angle)
+			# Compass Data
+			compass = self.Port['2'].value()
 
-			target_scaling = 1 if ball_strength < 50 else 1.7
+			# Ultrasonic Data
+			position = self.FieldPosition(compass)
 
-			position = self.FieldPosition()
 
-			if 5 < target_angle < 180:
+			# Get our target angle (towards the ball) in -180 to 180 format
+			target_angle = self.ConvertAngle(self.FixBallAngle(ball_angle))
+
+			target_scaling = 1 if ball_strength < 50 else 1.75
+
+			if target_angle < -15 or target_angle > 15:
 				target_angle *= target_scaling
-			elif 355 > target_angle > 180:
-				target_angle = 360 - ( (360 - target_angle) * target_scaling )
 
-			# Update our current angle
-			# current_angle = self.SmoothAngle(current_angle, target_angle, smoothing = 0.9)
-			current_angle = target_angle
+			# Filter out ball angle
+			filtered_angle = self.BallFilter.process_sample(target_angle)
 
 			# Calculate the 4 motor speeds
-			motor_calc = self.CalculateMotors(current_angle)
-
-			# Scale the 4 speeds to our target speed
-			scaled_speeds = self.ScaleSpeeds(current_speed,motor_calc)
+			# Scale the speeds to our target speed
+			scaled_speeds = self.ScaleSpeeds(current_speed,self.CalculateMotors(filtered_angle))
 
 			# Calculate our goal heading curve
 			curve = position / self.goal_gradient if ball_strength > 60 else 0
-			compass_fix = self.PointTo(self.goal_heading - curve, self.Port['2'].value())
+			compass_fix = self.PointTo(self.goal_heading - curve, compass)
 
 			# Turn to goal
 			curved_speeds = self.Turn(scaled_speeds, compass_fix)
@@ -246,22 +277,24 @@ class SoccerRobot(rc.Robot):
 			# Run the motors at desired speeds
 			self.StartMotors(self.Inverse(curved_speeds))
 
-			# Debugging stuff
-			# print("\nBall Angle:",ball_angle)
-			# print("Ball Strength:",ball_strength)
-			# print("Fixed Angle",target_angle)
-
-			DEBUG.append([self.FixBallAngle(ball_angle), target_angle, current_angle])
-
-		with open("debug.txt","w") as file:
-			dump(DEBUG,file)
+			# Store data if we want to debug the robot
+			if self.debug_mode:
+				DEBUG.append([curved_speeds, self.FixBallAngle(ball_angle), target_angle, filtered_angle])
 
 		# Stop motors and reset brick color 
 		self.CoastMotors()
 		self.Color('green')
 
+		# Save debug data
+		if self.debug_mode:
+			with open("{}.json".format(time()),"w") as file:
+				dump(DEBUG,file)
+
 	def Begin(self):
 		""" WHAT WE WANT TO CALL WHEN RUNNING CODE """
+
+		# Beep to tell us the robot is ready
+		self.Sound.play_tone(700,0.2,0,20,self.Sound.PLAY_NO_WAIT_FOR_COMPLETE)
 
 		# Run the menu
 		self.menu.Run()

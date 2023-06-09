@@ -19,7 +19,7 @@ def SmoothAngle(current:float, target:float, smoothing:float = 0.5, min_speed:fl
 	diff = current - target
 
 	while diff < -180: diff += 360
-	while diff > 180: diff -= 360
+	while diff > [d[0] for d in data]: diff -= 360
 
 	increase = abs(diff) * smoothing
 
