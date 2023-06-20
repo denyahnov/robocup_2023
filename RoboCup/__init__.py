@@ -188,7 +188,7 @@ class Robot():
 		return speeds
 
 	def PrintPorts(self) -> None:
-		print('\n'.join([str(self.Port[x] != None) for x in self.Port]))
+		print('\n'.join(["Port {}: {}".format(x,self.Port[x] != None) for x in self.Port]))
 
 	def AngleToXY(self,angle,speed) -> tuple:
 		x = speed * cos(angle)

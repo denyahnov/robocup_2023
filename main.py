@@ -87,6 +87,8 @@ class SoccerRobot(rc.Robot):
 
 		self.BallFilter = LowPassFilter(6)
 
+		self.PrintPorts()
+
 	def init_variables(self):
 		"""Create useful variables"""
 
@@ -187,10 +189,10 @@ class SoccerRobot(rc.Robot):
 
 		# Returns the speeds in [A,B,C,D] form
 		return [
-			front_left, 	# Motor A
-			back_left,		# Motor B
-			front_right,	# Motor C
-			back_right,		# Motor D
+			-front_left, 	# Motor A
+			 back_left,		# Motor B
+			 front_right,	# Motor C
+			-back_right,	# Motor D
 		]
 
 	def PointTo(self,target:float,current:float) -> float:
@@ -202,11 +204,6 @@ class SoccerRobot(rc.Robot):
 		"""Convert IR angle to 360 degrees"""
 
 		return ball_angle * 30
-
-	def Inverse(self,motors:list) -> list:
-		"""Inverse certain motors"""
-
-		return [-motors[0],motors[1],motors[2],-motors[3]]
 
 	def ConvertAngle(self,value:float) -> float:
 		"""Convert 0 to 360 degrees -> -180 to 180 degrees"""
@@ -277,11 +274,11 @@ class SoccerRobot(rc.Robot):
 			curved_speeds = self.Turn(scaled_speeds, compass_fix)
 
 			# Run the motors at desired speeds
-			self.StartMotors(self.Inverse(curved_speeds))
+			self.StartMotors(curved_speeds)
 
 			# Store data if we want to debug the robot
 			if self.debug_mode:
-				DEBUG.append([curved_speeds, self.FixBallAngle(ball_angle), target_angle, filtered_angle])
+				DEBUG.append([curved_speeds, scaled_speeds, compass_fix, self.FixBallAngle(ball_angle), target_angle, filtered_angle])
 
 		# Stop motors and reset brick color 
 		self.CoastMotors()
