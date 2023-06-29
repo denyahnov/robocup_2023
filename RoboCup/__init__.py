@@ -4,6 +4,7 @@ from ev3dev2.display import Display
 from ev3dev2.button import Button
 from ev3dev2.sound import Sound
 from ev3dev2.led import Leds
+from ev3dev2.sensor import Sensor
 from ev3dev2.motor import SpeedPercent
 
 from smbus import SMBus
@@ -75,7 +76,7 @@ class DoubleInfrared():
 	def __init__(self,sensor1,sensor2):
 		self.sensors = [
 			Sensor(sensor1[0], driver_name = Driver.IR),
-			Sensor(sensor2[1], driver_name = Driver.IR),
+			Sensor(sensor2[0], driver_name = Driver.IR),
 		]
 
 		self.angles = [sensor1[1], sensor2[1]]

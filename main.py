@@ -16,7 +16,7 @@ class LowPassFilter():
 	SAMPLE_RATE = 20
 
 	def __init__(self,omega_c):
-		self.init_constants(omega_c, 1 / Filter.SAMPLE_RATE)
+		self.init_constants(omega_c, 1 / LowPassFilter.SAMPLE_RATE)
 
 		self.last_input = 0
 		self.last_output = 0
@@ -25,7 +25,7 @@ class LowPassFilter():
 		self.alpha = (2 - T * omega_c) / (2 + T * omega_c)
 		self.beta = T * omega_c / (2 + T * omega_c)
 
-	def process_sample(x):
+	def process_sample(self,x):
 		y = self.alpha * self.last_output + self.beta * (x + self.last_input)
 
 		self.last_input = x
@@ -85,7 +85,7 @@ class SoccerRobot(rc.Robot):
 				(INPUT_4, 180),
 			)
 
-		self.BallFilter = LowPassFilter(6)
+		self.BallFilter = LowPassFilter(10)
 
 		self.PrintPorts()
 
@@ -141,6 +141,9 @@ class SoccerRobot(rc.Robot):
 		# Reset Motors
 		self.ResetMotors()
 
+		self.Port['2'].command = "BEGIN-CAL"
+		self.Port['2'].command = "END-CAL"
+
 		# Reset Variables
 		self.goal_heading = self.Port['2'].value()
 		self.center_distance = self.Port['3'].distance_centimeters
@@ -167,7 +170,7 @@ class SoccerRobot(rc.Robot):
 
 	def update_debug(self):
 		"""Update Debug Button Text"""
-		self.menu_buttons[2].text = f"Debug: {self.debug_mode}"
+		self.menu_buttons[2].text = "Debug: " + str(self.debug_mode)
 
 	def close_menu(self):
 		"""Close program"""
@@ -189,21 +192,29 @@ class SoccerRobot(rc.Robot):
 
 		# Returns the speeds in [A,B,C,D] form
 		return [
-			-front_left, 	# Motor A
-			 back_left,		# Motor B
-			 front_right,	# Motor C
-			-back_right,	# Motor D
+			front_left, 	# Motor A
+			back_left,		# Motor B
+			front_right,	# Motor C
+			back_right,	# Motor D
 		]
 
 	def PointTo(self,target:float,current:float) -> float:
 		"""Turn until we reach the target"""
 
-		return self.Speed.Clamp((self.ConvertAngle(current - target) + 5) / 3)
+		return self.Speed.Clamp(self.ConvertAngle(current - target) / 3)
 
 	def FixBallAngle(self,ball_angle:int) -> int:
 		"""Convert IR angle to 360 degrees"""
 
 		return ball_angle * 30
+
+	def Invert(self,speeds):
+		return [
+			-speeds[0],
+			speeds[1],
+			speeds[2],
+			-speeds[3],
+		]
 
 	def ConvertAngle(self,value:float) -> float:
 		"""Convert 0 to 360 degrees -> -180 to 180 degrees"""
@@ -254,9 +265,9 @@ class SoccerRobot(rc.Robot):
 			# Get our target angle (towards the ball) in -180 to 180 format
 			target_angle = self.ConvertAngle(self.FixBallAngle(ball_angle))
 
-			target_scaling = 1 if ball_strength < 50 else 1.75
+			target_scaling = 1 if ball_strength < 50 else 1.4
 
-			if target_angle < -15 or target_angle > 15:
+			if target_angle < -30 or target_angle > 30:
 				target_angle *= target_scaling
 
 			# Filter out ball angle
@@ -267,14 +278,14 @@ class SoccerRobot(rc.Robot):
 			scaled_speeds = self.ScaleSpeeds(current_speed,self.CalculateMotors(filtered_angle))
 
 			# Calculate our goal heading curve
-			curve = position / self.goal_gradient if ball_strength > 60 else 0
-			compass_fix = self.PointTo(self.goal_heading - curve, compass)
+			# curve = position / self.goal_gradient if ball_strength > 60 else 0
+			compass_fix = self.PointTo(self.goal_heading, compass)
 
 			# Turn to goal
 			curved_speeds = self.Turn(scaled_speeds, compass_fix)
 
 			# Run the motors at desired speeds
-			self.StartMotors(curved_speeds)
+			self.StartMotors(self.Invert(curved_speeds))
 
 			# Store data if we want to debug the robot
 			if self.debug_mode:

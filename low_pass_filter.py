@@ -27,7 +27,7 @@ def process_sample(x, x_prev, y, alpha, beta):
 
 
 
-alpha, beta = init_constants(6, 1/sample_rate)
+alpha, beta = init_constants(12, 1/sample_rate)
 
 
 
