@@ -238,7 +238,7 @@ class SoccerRobot(rc.Robot):
 
 		# Save debug data
 		if self.debug_mode:
-			with open("{}.json".format(time()),"w") as file:
+			with open("{}.json".format(round(time())),"w") as file:
 				dump(DEBUG,file)
 
 	def Begin(self):
