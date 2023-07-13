@@ -98,6 +98,11 @@ class SoccerRobot(rc.Robot):
 		self.goal_heading = 0
 		self.center_distance = 0
 
+		self.max_speed = 90
+		self.min_speed = 30
+
+		self.goal_gradient = 8
+
 		self.sound_volume = 20
 
 	def save_calibration(self):
@@ -171,6 +176,10 @@ class SoccerRobot(rc.Robot):
 		"""Close program"""
 		raise KeyboardInterrupt
 
+	def Turn(self,motors:list,speed:float) -> list:
+		"""Turn our robot at a certain speed"""
+		return [motor + speed for motor in motors]
+
 	def CalculateMotors(self,angle:float) -> list:
 		"""Calculate 4 Motor speeds from an angle"""
 		angle = math.radians(angle)
@@ -189,6 +198,16 @@ class SoccerRobot(rc.Robot):
 			back_right,	# Motor D
 		]
 
+	def PointTo(self,target:float,current:float) -> float:
+		"""Turn until we reach the target"""
+
+		return self.Speed.Clamp(self.ConvertAngle(current - target) / 3)
+
+	def FixBallAngle(self,ball_angle:int) -> int:
+		"""Convert IR angle to 360 degrees"""
+
+		return ball_angle * 30
+
 	def Invert(self,speeds):
 		return [
 			-speeds[0],
@@ -197,11 +216,31 @@ class SoccerRobot(rc.Robot):
 			-speeds[3],
 		]
 
+	def ConvertAngle(self,value:float) -> float:
+		"""Convert 0 to 360 degrees -> -180 to 180 degrees"""
+
+		return value if value <= 180 else value - 360
+
+	def CalcDistanceOffset(self,target:float,angle:int):
+		"""Compensate for Robot angle when reading wall distance"""
+		return target / math.cos(math.radians(angle if abs(angle) <= 50 else 50))
+
+	def FieldPosition(self,angle:int):
+		"""Get robot field position (Left : < 0 , Middle : 0, Right : > 0)"""
+
+		return self.Port['3'].distance_centimeters - self.CalcDistanceOffset(self.center_distance,angle)
+
 	def RunProgram(self):
 		"""Main loop"""
 
 		# Change brick color to red
 		self.Color('red')
+
+		target_angle = 0
+		target_scaling = 1
+
+		current_angle = target_angle
+		current_speed = self.max_speed
 
 		DEBUG = []
 
@@ -212,25 +251,45 @@ class SoccerRobot(rc.Robot):
 			# Stop program if middle or exit button pressed
 			if self.Buttons.enter or self.Buttons.backspace: break
 
+
 			# Unpack IR data
 			ball_angle, ball_strength = self.Port['1'].read()
 
 			# Compass Data
 			compass = self.Port['2'].value()
 
+			# Ultrasonic Data
+			position = self.FieldPosition(compass)
+
+
+			# Get our target angle (towards the ball) in -180 to 180 format
+			target_angle = self.ConvertAngle(self.FixBallAngle(ball_angle))
+
+			target_scaling = 1 if ball_strength < 50 else 1.4
+
+			if target_angle < -30 or target_angle > 30:
+				target_angle *= target_scaling
+
 			# Filter out ball angle
-			filtered_angle = self.BallFilter.process_sample(ball_angle)
+			filtered_angle = self.BallFilter.process_sample(target_angle)
 
 			# Calculate the 4 motor speeds
 			# Scale the speeds to our target speed
 			scaled_speeds = self.ScaleSpeeds(current_speed,self.CalculateMotors(filtered_angle))
+
+			# Calculate our goal heading curve
+			# curve = position / self.goal_gradient if ball_strength > 60 else 0
+			compass_fix = self.PointTo(self.goal_heading, compass)
+
+			# Turn to goal
+			curved_speeds = self.Turn(scaled_speeds, compass_fix)
 
 			# Run the motors at desired speeds
 			self.StartMotors(self.Invert(curved_speeds))
 
 			# Store data if we want to debug the robot
 			if self.debug_mode:
-				DEBUG.append([])
+				DEBUG.append([curved_speeds, scaled_speeds, compass_fix, self.FixBallAngle(ball_angle), target_angle, filtered_angle])
 
 		# Stop motors and reset brick color 
 		self.CoastMotors()
