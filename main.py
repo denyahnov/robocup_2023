@@ -186,7 +186,7 @@ class SoccerRobot(rc.Robot):
 			front_left, 	# Motor A
 			back_left,		# Motor B
 			front_right,	# Motor C
-			back_right,	# Motor D
+			back_right,		# Motor D
 		]
 
 	def Invert(self,speeds):
