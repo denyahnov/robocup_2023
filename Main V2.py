@@ -196,6 +196,11 @@ class SoccerRobot(rc.Robot):
 			speeds[2],
 			-speeds[3],
 		]
+	
+	def ConvertAngle(self,value:float) -> float:
+		"""Convert 0 to 360 degrees -> -180 to 180 degrees"""
+
+		return value if value <= 180 else value - 360
 
 	def RunProgram(self):
 		"""Main loop"""
@@ -218,8 +223,10 @@ class SoccerRobot(rc.Robot):
 			# Compass Data
 			compass = self.Port['2'].value()
 
+			angle = self.ConvertAngle(ball_angle * 30)
+
 			# Filter out ball angle
-			filtered_angle = self.BallFilter.process_sample(ball_angle)
+			filtered_angle = self.BallFilter.process_sample(angle)
 
 			# Calculate the 4 motor speeds
 			# Scale the speeds to our target speed
