@@ -81,8 +81,8 @@ class SoccerRobot(rc.Robot):
 			self.Port['1'] = rc.IRSeeker360(INPUT_1)
 		else:
 			self.Port['1'] = rc.DoubleInfrared(
-				(INPUT_1, 0),
-				(INPUT_4, 180),
+				(INPUT_1, 45),
+				(INPUT_4, 225),
 			)
 
 		self.BallFilter = LowPassFilter(10)

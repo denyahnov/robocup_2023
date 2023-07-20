@@ -230,14 +230,14 @@ class SoccerRobot(rc.Robot):
 
 			# Calculate the 4 motor speeds
 			# Scale the speeds to our target speed
-			scaled_speeds = self.ScaleSpeeds(50,self.CalculateMotors(filtered_angle))
+			scaled_speeds = self.ScaleSpeeds(50,self.CalculateMotors(angle))
 
 			# Run the motors at desired speeds
 			self.StartMotors(self.Invert(scaled_speeds))
 
 			# Store data if we want to debug the robot
 			if self.debug_mode:
-				DEBUG.append([])
+				DEBUG.append([scaled_speeds,angle,filtered_angle])
 
 		# Stop motors and reset brick color 
 		self.CoastMotors()
@@ -245,7 +245,7 @@ class SoccerRobot(rc.Robot):
 
 		# Save debug data
 		if self.debug_mode:
-			with open("{}.json".format(round(time())),"w") as file:
+			with open("{}.json".format(int(time())),"w") as file:
 				dump(DEBUG,file)
 
 	def Begin(self):

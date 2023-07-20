@@ -4,7 +4,7 @@ from GameMaker.Assets import *
 import math
 import json
 
-FILE_NAME = "1586594900.7226837.json"
+FILE_NAME = "1586558981.json"
 
 def ClampList(values: list,min_value=-100,max_value=100) -> list:
 	clamped = [None] * len(values)
@@ -20,7 +20,7 @@ def ClampList(values: list,min_value=-100,max_value=100) -> list:
 def AngleToPosition(angle,distance):
 	return distance * math.cos(math.radians(angle - 90)), distance * math.sin(math.radians(angle - 90))
 
-with open("DEBUG\\" + FILE_NAME,"r") as file:
+with open(FILE_NAME,"r") as file:
 	data = json.load(file) 
 
 window = gm.Window([400,400],fps=20)
@@ -48,9 +48,9 @@ class Robot():
 	Speeds = [0,0,0,0]
 
 while window.RUNNING:
-	ball_angle, target_angle, filtered_angle = data[tick][-3:]
+	ball_angle, filtered_angle = data[tick][-2:]
 
-	x1,y1 = AngleToPosition(target_angle,60)
+	# x1,y1 = AngleToPosition(target_angle,60)
 	x2,y2 = AngleToPosition(ball_angle,80)
 	x3,y3 = AngleToPosition(filtered_angle,100)
 
@@ -61,7 +61,7 @@ while window.RUNNING:
 
 	window.draw(Line([200,200,200 + x3, 200 + y3],color=(0,255,0)))
 	window.draw(Line([200,200,200 + x2, 200 + y2],color=(255,0,0)))
-	window.draw(Line([200,200,200 + x1, 200 + y1],color=(0,0,255)))
+	# window.draw(Line([200,200,200 + x1, 200 + y1],color=(0,0,255)))
 
 	window.draw(Text(tick,[10,10]),gm.GUI)
 
