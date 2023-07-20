@@ -2,9 +2,11 @@
 import json
 import os
 
-with open("debug.txt", "r") as f:
-    vals = json.load(f)
-    vals = [(v[0] if v[0] <= 180 else v[0] - 360) for v in vals]
+FILE_NAME = "1586594900.7226837.json"
+
+with open("DEBUG\\" + FILE_NAME,"r") as file:
+    vals = json.load(file)
+    vals = [(v[-3] if v[-3] <= 180 else v[-3] - 360) for v in vals]
 
 
 out = [0 for i in range(len(vals))]

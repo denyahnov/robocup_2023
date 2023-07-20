@@ -4,42 +4,23 @@ from GameMaker.Assets import *
 import math
 import json
 
-import low_pass_filter
+FILE_NAME = "1586594900.7226837.json"
+
+def ClampList(values: list,min_value=-100,max_value=100) -> list:
+	clamped = [None] * len(values)
+
+	for i,value in enumerate(values):
+		if value < min_value: value = min_value
+		if value > max_value: value = max_value
+
+		clamped[i] = value
+
+	return clamped
 
 def AngleToPosition(angle,distance):
 	return distance * math.cos(math.radians(angle - 90)), distance * math.sin(math.radians(angle - 90))
 
-def ScaleSpeeds(target_value:int,speeds:list) -> list:
-	greatest = max([abs(speed) for speed in speeds])
-
-	if greatest > target_value: greatest = target_value
-
-	fix = target_value / greatest
-
-	for i in range(len(speeds)):
-		speeds[i] = int(round(speeds[i] * fix,2))
-
-	return speeds
-
-def CalculateMotors(angle:float) -> list:
-	"""Calculate 4 Motor speeds from an angle"""
-	angle = math.radians(angle)
-
-	# Math stuff
-	front_left =  -1 * math.cos(math.pi / 4 - angle)
-	front_right = 1 * math.cos(math.pi / 4 + angle)
-	back_left =  -1 * math.cos(math.pi / 4 + angle)
-	back_right = 1 * math.cos(math.pi / 4 - angle)
-
-	# Returns the speeds in [A,B,C,D] form
-	return [
-		front_left, 	# Motor A
-		front_right,	# Motor C
-		back_left,		# Motor B
-		back_right,		# Motor D
-	]
-
-with open("debug.txt","r") as file:
+with open("DEBUG\\" + FILE_NAME,"r") as file:
 	data = json.load(file) 
 
 window = gm.Window([400,400],fps=20)
@@ -67,13 +48,13 @@ class Robot():
 	Speeds = [0,0,0,0]
 
 while window.RUNNING:
-	ball_angle, target_angle, current_angle = data[tick]
+	ball_angle, target_angle, filtered_angle = data[tick][-3:]
 
 	x1,y1 = AngleToPosition(target_angle,60)
 	x2,y2 = AngleToPosition(ball_angle,80)
-	x3,y3 = AngleToPosition(low_pass_filter.out[tick],100)
+	x3,y3 = AngleToPosition(filtered_angle,100)
 
-	Robot.Speeds = ScaleSpeeds(100,CalculateMotors(low_pass_filter.out[tick]))
+	Robot.Speeds = ClampList(data[tick][0])
 
 	for i,Motor in enumerate(Robot.Motors):
 		Motor.foreground_color = speed_to_color(Robot.Speeds[i])
