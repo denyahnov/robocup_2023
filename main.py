@@ -202,6 +202,10 @@ class SoccerRobot(rc.Robot):
 
 		return value if value <= 180 else value - 360
 
+	def Turn(self,motors:list,speed:float) -> list:
+		"""Turn our robot at a certain speed"""
+		return [motor + speed for motor in motors]
+
 	def RunProgram(self):
 		"""Main loop"""
 
@@ -209,6 +213,9 @@ class SoccerRobot(rc.Robot):
 		self.Color('red')
 
 		DEBUG = []
+
+		max_turn = 50
+		speed = 80
 
 		while True:
 			# Update button variables
@@ -221,23 +228,27 @@ class SoccerRobot(rc.Robot):
 			ball_angle, ball_strength = self.Port['1'].read()
 
 			# Compass Data
-			compass = self.Port['2'].value()
+			compass = self.Port['2'].value() - self.goal_heading
 
-			angle = self.ConvertAngle(ball_angle * 30)
+			three_sixty_angle = self.ConvertAngle(ball_angle * 30)
 
-			# Filter out ball angle
-			filtered_angle = self.BallFilter.process_sample(angle)
+			if ball_strength > 50: three_sixty_angle *= 1.5
+
+			while compass > 180: compass -= 360
+			while compass < -180: compass += 360
 
 			# Calculate the 4 motor speeds
 			# Scale the speeds to our target speed
-			scaled_speeds = self.ScaleSpeeds(50,self.CalculateMotors(angle))
+			speeds = self.ScaleSpeeds(speed,self.CalculateMotors(three_sixty_angle))
+
+			scaled_speeds = self.Turn(speeds,min(max(compass,-max_turn),max_turn))
 
 			# Run the motors at desired speeds
 			self.StartMotors(self.Invert(scaled_speeds))
 
 			# Store data if we want to debug the robot
-			if self.debug_mode:
-				DEBUG.append([scaled_speeds,angle,filtered_angle])
+			# if self.debug_mode:
+				# DEBUG.append([scaled_speeds,angle,filtered_angle])
 
 		# Stop motors and reset brick color 
 		self.CoastMotors()
@@ -260,6 +271,8 @@ class SoccerRobot(rc.Robot):
 		# Once finished reset motors and change color back to green
 		self.CoastMotors()
 		self.Color('green')
+
+		self.Port["1"].close()
 
 # If the program is started run the code
 if __name__ == '__main__':
