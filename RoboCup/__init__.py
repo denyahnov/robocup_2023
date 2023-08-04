@@ -84,19 +84,22 @@ class DoubleInfrared():
 		for s in self.sensors: s.mode = "AC-ALL"
 
 	def true_value(self,sensor_id):
-		return (self.sensors[sensor_id].value() * 30) + self.angles[sensor_id]
+		return ( ( (self.sensors[sensor_id].value(0) - 5) * 30) + self.angles[sensor_id] ) / 30
 
 	def proximity(self,sensor_id):
 		return max([self.sensors[sensor_id].value(i) for i in range(1,5)])
 
 	def read(self):
-		front = self.true_value(0) / 12, self.proximity(0)
-		back =  self.true_value(1) / 12, self.proximity(1)
+		front = self.true_value(0), self.proximity(0)
+		back =  self.true_value(1), self.proximity(1)
 
 		if front[1] > back[1]:
 			return front
 
 		return back 
+
+	def close(self):
+		pass
 
 class IRSeeker360():
 	def __init__(self,port:int):

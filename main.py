@@ -171,6 +171,11 @@ class SoccerRobot(rc.Robot):
 		"""Close program"""
 		raise KeyboardInterrupt
 
+	def get_proximity(self):
+		if self.robot_id == 0: return 50 # 360 Board Robot
+
+		return 80 # EV3 Sensor Robot
+
 	def CalculateMotors(self,angle:float) -> list:
 		"""Calculate 4 Motor speeds from an angle"""
 		angle = math.radians(angle)
@@ -232,7 +237,7 @@ class SoccerRobot(rc.Robot):
 
 			three_sixty_angle = self.ConvertAngle(ball_angle * 30)
 
-			if ball_strength > 50: three_sixty_angle *= 1.5
+			if ball_strength > self.get_proximity(): three_sixty_angle *= 1.5
 
 			while compass > 180: compass -= 360
 			while compass < -180: compass += 360
@@ -241,14 +246,15 @@ class SoccerRobot(rc.Robot):
 			# Scale the speeds to our target speed
 			speeds = self.ScaleSpeeds(speed,self.CalculateMotors(three_sixty_angle))
 
-			scaled_speeds = self.Turn(speeds,min(max(compass,-max_turn),max_turn))
+			# Clamp turn value to the `max_turn` variable
+			scaled_speeds = self.Turn(speeds,min(max(compass * 1.5,-max_turn),max_turn))
 
 			# Run the motors at desired speeds
 			self.StartMotors(self.Invert(scaled_speeds))
 
 			# Store data if we want to debug the robot
-			# if self.debug_mode:
-				# DEBUG.append([scaled_speeds,angle,filtered_angle])
+			if self.debug_mode:
+				DEBUG.append([scaled_speeds,three_sixty_angle])
 
 		# Stop motors and reset brick color 
 		self.CoastMotors()
