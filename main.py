@@ -219,10 +219,13 @@ class SoccerRobot(rc.Robot):
 
 		DEBUG = []
 
-		max_turn = 50
-		speed = 80
+		speed = 90
+		max_turn = 75
+		
+		compass_bias = -5
 
 		while True:
+
 			# Update button variables
 			self.Buttons.process()
 
@@ -233,7 +236,7 @@ class SoccerRobot(rc.Robot):
 			ball_angle, ball_strength = self.Port['1'].read()
 
 			# Compass Data
-			compass = self.Port['2'].value() - self.goal_heading
+			compass = self.Port['2'].value() - self.goal_heading - compass_bias
 
 			three_sixty_angle = self.ConvertAngle(ball_angle * 30)
 
@@ -247,10 +250,10 @@ class SoccerRobot(rc.Robot):
 			speeds = self.ScaleSpeeds(speed,self.CalculateMotors(three_sixty_angle))
 
 			# Clamp turn value to the `max_turn` variable
-			scaled_speeds = self.Turn(speeds,min(max(compass * 1.5,-max_turn),max_turn))
+			scaled_speeds = self.Turn(speeds,min(max(compass * 2,-max_turn),max_turn))
 
 			# Run the motors at desired speeds
-			self.StartMotors(self.Invert(scaled_speeds))
+			self.StartMotors(self.Invert(self.ScaleSpeeds(speed,scaled_speeds)))
 
 			# Store data if we want to debug the robot
 			if self.debug_mode:
