@@ -34,7 +34,7 @@ def main():
 	speed = 90
 	max_turn = 75
 	
-	compass_bias = -5
+	ball_prox = 50
 
 	while True:
 
@@ -48,24 +48,21 @@ def main():
 		ball_angle, ball_strength = sensors.port['1'].read()
 
 		# Compass Data
-		compass = sensor.port['2'].value() - calibration.goal_heading - compass_bias
+		compass = drivebase.GetRelativeAngle(sensor.port['2'].value(), calibration.goal_heading)
 
 		three_sixty_angle = drivebase.ConvertAngle(ball_angle * 30)
 
-		if ball_strength > 80: three_sixty_angle *= 1.5
-
-		while compass > 180: compass -= 360
-		while compass < -180: compass += 360
+		if ball_strength > ball_prox: three_sixty_angle *= 1.5
 
 		# Calculate the 4 motor speeds
 		# Scale the speeds to our target speed
-		speeds = drivebase.ScaleSpeeds(speed, drivebase.MoveTo(three_sixty_angle))
+		scaled_speeds = drivebase.ScaleSpeeds(speed, drivebase.MoveTo(three_sixty_angle))
 
 		# Clamp turn value to the `max_turn` variable
-		scaled_speeds = drivebase.Turn(speeds,min(max(compass * 2,-max_turn),max_turn))
+		turned_speeds = drivebase.Turn(speeds, drivebase.Compensate(compass))
 
 		# Run the motors at desired speeds
-		drivebase.Drive(drivebase.ScaleSpeeds(speed,scaled_speeds))
+		drivebase.Drive(drivebase.ScaleSpeeds(speed,turned_speeds))
 
 		# Store data if we want to debug the robot
 		if calibration.debug_mode:

@@ -56,3 +56,9 @@ def ConvertAngle(angle):
 
 def Turn(speed,speeds):
 	return [s + speed for s in speeds]
+
+def GetRelativeAngle(angle,relation):
+	return ConvertAngle((((angle - relation) % 360) + 360) % 360)
+
+def Compensate(angle):
+	return angle * 2
