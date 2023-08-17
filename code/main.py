@@ -36,6 +36,12 @@ def main():
 	
 	ball_prox = 50
 
+	kickoff_length = 60
+
+	# Drive Straight for X amount of time
+	for i in range(kickoff_length):
+		drivebase.Drive(drivebase.MoveTo(0))
+
 	while True:
 
 		# Update button variables
