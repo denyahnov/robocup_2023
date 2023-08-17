@@ -6,7 +6,7 @@ from ev3dev2.button import Button
 from ev3dev2.display import Display
 
 class MenuButton():
-	def __init__(self,text:str="",icon:list=None,script:...=None):
+	def __init__(self,text:str="",icon:list=None,script:...=None,args=[]):
 		self.text = text
 		self.icon = icon
 		
@@ -71,12 +71,13 @@ class Menu():
 
 				if self.buttons.enter:
 					script = self.menu_buttons[self.cursor_pos[0] + (self.menu_size[0] * self.cursor_pos[1])].script
+					args = self.menu_buttons[self.cursor_pos[0] + (self.menu_size[0] * self.cursor_pos[1])].args
 
 					while self.buttons.enter:
 						self.buttons.process()
 						sleep(0.01)
 
-					if callable(script): script()
+					if callable(script): script(*args)
 
 				self.Draw()
 

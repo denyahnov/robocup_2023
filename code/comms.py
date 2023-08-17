@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import bluetooth
 
 uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
@@ -11,7 +13,10 @@ def Server():
 	ip,port = server.getsockname()
 
 
-	bluetooth.advertise_service(server, "RobotServer", service_id=uuid,
+	bluetooth.advertise_service(
+		server, 
+		"RobotServer", 
+		service_id=uuid,
 		service_classes=[uuid, bluetooth.SERIAL_PORT_CLASS],
 		profiles=[bluetooth.SERIAL_PORT_PROFILE],
 	)
@@ -26,14 +31,16 @@ def Server():
 	server.close()
 
 def Client():
-	bluetooth.settimeout(5)
 	service_matches = bluetooth.find_service(uuid=uuid)
 
-	print(server := service_matches[0])
+	server = service_matches[0]
+
+	print(server)
 
 	client = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
 	client.connect((server["host"], server["port"]))
 
 	client.close()
 
-Client()
+def Start():
+	pass
