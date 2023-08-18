@@ -11,6 +11,13 @@ class IRSeeker360():
 	def read(self):
 		return self.bus.read_i2c_block_data(self.i2c_address, 0, 2)
 
+	def read_averaged(self,sample_size=30):
+		data = [self.bus.read_i2c_block_data(self.i2c_address, 0, 2) for i in range(sample_size)]
+
+		directions, strengths = zip(*data)
+
+		return sum(directions) / len(directions), sum(strengths) / len(strengths)
+
 	def create_bus(self):
 		self.bus = SMBus(self.port + 0x2)
 

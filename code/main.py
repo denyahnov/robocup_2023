@@ -5,9 +5,9 @@ import sensors
 import calibration
 import comms
 import brick
+import behaviours
 
-from menu import *
-from behaviours import *
+from menu import Menu, MenuButton
 
 from traceback import print_exc
 
@@ -19,15 +19,14 @@ def main():
 	# Change brick color to red
 	brick.Color('red')
 
-	DEBUG = []
-
-	max_turn = 75
-	
 	kickoff_length = 60
+
+	ball_hold_counter = 0
+	ball_hold_threshold = 20 
 
 	# Drive Straight for X amount of time
 	for i in range(kickoff_length):
-		Kickoff(drivebase)
+		behaviours.Kickoff(drivebase)
 
 	while True:
 
@@ -37,39 +36,30 @@ def main():
 		# Stop program if middle or exit button pressed
 		if brick.buttons.enter or brick.buttons.backspace: break
 
-		# Unpack IR data
-		ball_angle, ball_strength = sensors.IR.read()
+		# Update Sensors
+		sensors.UpdateValues(calibration)
 
-		# Compass Data
-		compass = sensors.GetRelativeAngle(sensors.Compass.value(), calibration.goal_heading)
+		# Count how long we are in possesion of the ball
+		if sensors.Values.has_ball:
+			ball_hold_counter += 1
+		else:
+			ball_hold_counter = 0
 
-		ultrasonic = sensors.Ultrasonic.distance_centimeters - calibration.center_distance
+		# If we have the ball long enough, try score
+		if ball_hold_counter > ball_hold_threshold:
+			behaviours.Score(drivebase,sensors.Values)
+		
+		# Otherwise if we can see the ball, chase it
+		elif ball_strength > 0:
+			behaviours.Chase(drivebase,sensors.Values)
 
-		three_sixty_angle = sensors.ConvertAngle(ball_angle * 30)
-
-		values = {
-			"ball_angle": ball_angle,
-			"ball_strength": ball_strength,
-			"compass": compass,
-			"ultrasonic": ultrasonic,
-			"ball_360_angle": three_sixty_angle,
-			"has_ball": sensors.HasBall(ball_strength),
-		}
-
-		Chase(drivebase,values)
-
-		# Store data if we want to debug the robot
-		if calibration.debug_mode:
-			DEBUG.append([scaled_speeds,three_sixty_angle])
+		# If we cannot find the ball, wait
+		else:
+			behaviours.Idle(drivebase,sensors.Values)
 
 	# Stop motors and reset brick color 
 	drivebase.Coast()
 	brick.Color('green')
-
-	# Save debug data
-	if calibration.debug_mode:
-		with open("{}.json".format(int(time())),"w") as file:
-			dump(DEBUG,file)
 
 # Define all our buttons and functions
 menu_buttons = [

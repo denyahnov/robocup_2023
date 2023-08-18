@@ -9,6 +9,38 @@ Ultrasonic = UltrasonicSensor(INPUT_3)
 
 Compass.mode = "COMPASS"
 
+# VALUE DICTIONARY:
+# =============================
+# ball_angle: 		-180 to 180
+# ball_direction: 	0 to 12
+# ball_strength: 	0 to ~150
+# compass: 			-180 to 180
+# ultrasonic: 		-130 to ~130
+# touch_sensor:		True or False
+# has_ball:			True or False
+
+class Values:
+	ball_angle = 0
+	ball_direction = 0
+	ball_strength = 0
+	compass = 0
+	ultrasonic = 0
+	touch_sensor = False
+	has_ball = False
+
+def UpdateValues(calibration):
+	Values.ball_direction, Values.ball_strength = IR.read()
+
+	Values.ball_angle = ConvertAngle(ball_angle * 30)
+
+	Values.compass = GetRelativeAngle(Compass.value(), calibration.goal_heading)
+
+	Values.ultrasonic = Ultrasonic.distance_centimeters - calibration.center_distance
+
+	Values.touch_sensor = False
+
+	Values.has_ball = HasBall(Values.ball_strength)
+
 def ConvertAngle(angle):
 	"""Convert 0 to 360 degrees -> -180 to 180 degrees"""
 
