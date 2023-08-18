@@ -4,7 +4,9 @@ import math
 
 global motors
 
-motors = {MediumMotor("out" + port) for port in "ABCD"}
+motors = {port: MediumMotor("out" + port) for port in "ABCD"}
+
+DRIVEBASE_SPEED = 90
 
 # A and D are negative
 
@@ -26,7 +28,7 @@ def MoveTo(angle:float) -> list:
 		back_right,		# Motor D
 	]
 
-def ScaleSpeeds(target_value:int,speeds:list) -> list:
+def ScaleSpeeds(speeds:list,target_value:int = DRIVEBASE_SPEED) -> list:
 	greatest = max([abs(speed) for speed in speeds])
 
 	return [round(s * (target_value / greatest)) for s in speeds]
@@ -49,16 +51,11 @@ def Coast():
 
 	[motors[i].off(brake=False) for i in motors]
 
-def ConvertAngle(angle):
-	"""Convert 0 to 360 degrees -> -180 to 180 degrees"""
+def Turn(turn_speed,speeds):
+	return [s + turn_speed for s in speeds]
 
-	return angle if angle <= 180 else angle - 360
-
-def Turn(speed,speeds):
-	return [s + speed for s in speeds]
-
-def GetRelativeAngle(angle,relation):
-	return ConvertAngle((((angle - relation) % 360) + 360) % 360)
-
-def Compensate(angle):
+def TurnToHeading(angle):
 	return angle * 2
+
+def IsStalled():
+	return any([motors[i].is_stalled for i in motors])

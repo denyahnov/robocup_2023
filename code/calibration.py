@@ -39,12 +39,12 @@ def Calibrate(drivebase,sensors):
 
 	drivebase.Reset()
 
-	sensors.port['2'].command = "BEGIN-CAL"
-	sensors.port['2'].command = "END-CAL"
+	sensors.Compass.command = "BEGIN-CAL"
+	sensors.Compass.command = "END-CAL"
 
 	# Reset Variables
-	goal_heading = sensors.port['2'].value()
-	center_distance = sensors.port['3'].distance_centimeters
+	goal_heading = sensors.Compass.value()
+	center_distance = sensors.Ultrasonic.distance_centimeters
 
 	# Save the data to json file
 	Save()

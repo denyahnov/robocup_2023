@@ -6,22 +6,12 @@ import calibration
 import comms
 import brick
 
-from menu import Menu, MenuButton
+from menu import *
+from behaviours import *
+
+from traceback import print_exc
 
 def close_menu(self): raise KeyboardInterrupt
-
-# Define all our buttons and functions
-menu_buttons = [
-	MenuButton("Run Program",script=main),
-	MenuButton("Calibrate",script=calibration.Calibrate,args=[drivebase,sensors]),
-	MenuButton("Bluetooth: False",script=comms.Start),
-	MenuButton("Exit",script=close_menu),
-]
-
-# Create Menu Class
-menu = Menu([2,2], menu_buttons)
-
-calibration.Load()
 
 def main():
 	"""Main loop"""
@@ -31,16 +21,13 @@ def main():
 
 	DEBUG = []
 
-	speed = 90
 	max_turn = 75
 	
-	ball_prox = 50
-
 	kickoff_length = 60
 
 	# Drive Straight for X amount of time
 	for i in range(kickoff_length):
-		drivebase.Drive(drivebase.MoveTo(0))
+		Kickoff(drivebase)
 
 	while True:
 
@@ -51,24 +38,25 @@ def main():
 		if brick.buttons.enter or brick.buttons.backspace: break
 
 		# Unpack IR data
-		ball_angle, ball_strength = sensors.port['1'].read()
+		ball_angle, ball_strength = sensors.IR.read()
 
 		# Compass Data
-		compass = drivebase.GetRelativeAngle(sensor.port['2'].value(), calibration.goal_heading)
+		compass = sensors.GetRelativeAngle(sensors.Compass.value(), calibration.goal_heading)
 
-		three_sixty_angle = drivebase.ConvertAngle(ball_angle * 30)
+		ultrasonic = sensors.Ultrasonic.distance_centimeters - calibration.center_distance
 
-		if ball_strength > ball_prox: three_sixty_angle *= 1.5
+		three_sixty_angle = sensors.ConvertAngle(ball_angle * 30)
 
-		# Calculate the 4 motor speeds
-		# Scale the speeds to our target speed
-		scaled_speeds = drivebase.ScaleSpeeds(speed, drivebase.MoveTo(three_sixty_angle))
+		values = {
+			"ball_angle": ball_angle,
+			"ball_strength": ball_strength,
+			"compass": compass,
+			"ultrasonic": ultrasonic,
+			"ball_360_angle": three_sixty_angle,
+			"has_ball": sensors.HasBall(ball_strength),
+		}
 
-		# Clamp turn value to the `max_turn` variable
-		turned_speeds = drivebase.Turn(speeds, drivebase.Compensate(compass))
-
-		# Run the motors at desired speeds
-		drivebase.Drive(drivebase.ScaleSpeeds(speed,turned_speeds))
+		Chase(drivebase,values)
 
 		# Store data if we want to debug the robot
 		if calibration.debug_mode:
@@ -83,14 +71,31 @@ def main():
 		with open("{}.json".format(int(time())),"w") as file:
 			dump(DEBUG,file)
 
+# Define all our buttons and functions
+menu_buttons = [
+	MenuButton("Run Program",script=main),
+	MenuButton("Calibrate",script=calibration.Calibrate,args=[drivebase,sensors]),
+	MenuButton("Bluetooth: False",script=comms.Start),
+	MenuButton("Exit",script=close_menu),
+]
+
+# Create Menu Class
+menu = Menu([2,2], menu_buttons)
+
+calibration.Load()
 
 # If the program is started run the code
 if __name__ == '__main__':
 	brick.PlayTone(700)
 
-	menu.Run()
+	try:
+		menu.Run()
+	except KeyboardInterrupt:
+		print("Keyboard Interrupt")
+	except:
+		print_exc()
 
 	drivebase.Coast()
 	brick.Color('green')
 
-	sensors.port['1'].close()
+	sensors.IR.close()
