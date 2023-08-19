@@ -64,7 +64,7 @@ def main():
 # Define all our buttons and functions
 menu_buttons = [
 	MenuButton("Run Program",script=main),
-	MenuButton("Calibrate",script=calibration.Calibrate,args=[drivebase,sensors]),
+	MenuButton("Calibrate",script=calibration.Calibrate,args=[brick,drivebase,sensors]),
 	MenuButton("Bluetooth: False",script=comms.Start),
 	MenuButton("Exit",script=close_menu),
 ]

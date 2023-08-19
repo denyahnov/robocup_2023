@@ -32,10 +32,12 @@ def Load(self):
 	except FileNotFoundError:
 		Save()
 
-def Calibrate(drivebase,sensors):
+def Calibrate(brick,drivebase,sensors):
 	"""Calibrate all sensors, Reset motor positions and read goal heading + wall distance"""
 
 	global goal_heading, center_distance
+
+	brick.Color('orange')
 
 	drivebase.Reset()
 
@@ -48,3 +50,6 @@ def Calibrate(drivebase,sensors):
 
 	# Save the data to json file
 	Save()
+
+	brick.Color('green')
+	brick.PlayTone(650)

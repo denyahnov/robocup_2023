@@ -36,10 +36,10 @@ def ScaleSpeeds(speeds:list,target_value:int = DRIVEBASE_SPEED) -> list:
 def Drive(speeds):
 	global motors
 
-	motors["A"].on(SpeedPercent(speeds[0]))
+	motors["A"].on(SpeedPercent(-speeds[0]))
 	motors["B"].on(SpeedPercent(speeds[1]))
 	motors["C"].on(SpeedPercent(speeds[2]))
-	motors["D"].on(SpeedPercent(speeds[3]))
+	motors["D"].on(SpeedPercent(-speeds[3]))
 
 def Reset():
 	global motors
