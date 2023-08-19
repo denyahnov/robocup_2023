@@ -19,11 +19,11 @@
 
 ### **Introduction:**
 
-We are Dennis and Saum, a group of year 10s from Melbourne High School. We are a small team of 2 and operate on a weekly basis. We have a variety of experience in various robotics competitions and have competed in RoboCup before.
+We are Dennis, Saum and Jones, a group of year 10s from Melbourne High School. We are a small team of 2 and operate on a weekly basis. We have a variety of experience in various robotics competitions and have competed in RoboCup before.
 
 ### **Strategy:**
 **Game:**
-Our strategy for this competition was to try get ball possession as quickly as possible after a ball reset throughout the matches as we found that getting to the ball quick enough and to push it into our opponents direction was enough to gain an advantage in matches. We chose to run 2 robots with the same design, opting out of using a designated 'goalie'. This was partly due to the previously stated decision, but also because we chose to use inter-robot communication. The ability for the robots to relay information like ball possession would allow them to play defense/offense completely autonomously, without the need of specific roles.
+Our strategy was heavily based on adaptability to the current situation. We wanted to be able to get ball possession as quickly as possible after a ball reset as we found that getting to the ball quick enough and to push it into our opponents direction was enough to gain an advantage in matches. We chose to run 2 robots with the same design, opting out of using a designated 'goalie' design. This was partly due to the previously stated decision, but also because we chose to use inter-robot communication. The ability for the robots to relay information like ball possession would allow them to play defense/offense completely autonomously, without the need of specific roles.
 
 ![Soccer Field](https://user-images.githubusercontent.com/60083582/185514513-ba5dd76e-ddfc-4a0a-9a91-03beb1630f51.png)
 
@@ -49,7 +49,7 @@ B --> C(Process Information)
 C --> A
 ```
 ### **Robot Design:**
-Our design choices for this competition were to use 2 identical robots with 4 EV3 Medium Motors, 1 BBR 360 IRSeeker, 1 I2C Compass Sensor and an EV3 Ultrasonic Sensor. We decided that the identity between robots would help resolve issues and keep code as similar as possible. 
+Our design choices for this competition were to use 2 identical robots with 4 EV3 Medium Motors, 1 BBR 360 IRSeeker, 1 I2C Compass Sensor, 1 EV3 Ultrasonic Sensor and an EV3 Touch Sensor. We decided that the identity between robots would help resolve issues and keep code as similar as possible.
 
 Because of the limited time working on the robot in person, we began testing out with [different robot designs](https://github.com/denyahnov/robocup_2023/blob/main/EngineeringJournal.md#photos) using parts from home or [Studio 2.0](https://www.bricklink.com/v2/build/studio.page), a virtual LEGO builder.
 
@@ -57,9 +57,9 @@ We use 4 motors with omniwheels positioned around the robot to form an X-drive (
 
 <img src="https://user-images.githubusercontent.com/60083582/227100512-e9f32a52-ba2e-4808-a4f3-4d94c4be7d3c.png" width="300" height="300" />
 
-This year, we challenged ourselves by using a [BBR IRSeeker](https://irseeker.buildingblockrobotics.com/) which allowed us to have 360 degree infrared vision with just 1 EV3 port used. We had no previous experience using these sensors and built our [own wrapper](https://github.com/denyahnov/ir-seeker) based on limited online documentation for easy use of the sensor.
+This year, we challenged ourselves by using a [BBR IRSeeker](https://irseeker.buildingblockrobotics.com/) which allowed us to have 360 degree infrared vision with just 1 EV3 port used. We had no previous experience using these sensors and through trial and error built our [own wrapper](https://github.com/denyahnov/ir-seeker) based on limited online documentation for easy use of the sensor.
 
-We use the compass for reading our angle which is used in straightening ourselves as well as curving at the opponent goal. We use an  Ultrasonic positioned on the side of our robots to read our position on the field horizontally. This helps the robot figure out where it is on the field at all times.
+We use the compass for reading our angle which is used in straightening ourselves as well as curving at the opponent goal. We use an  Ultrasonic positioned on the side of our robots to read our position on the field horizontally. This helps the robot figure out where it is on the field at all times. We also use a touch sensor to hit the crossbar of our goal for a defender robot to know it's position.
 
 | **Motor**         |  **Pros**                     |  **Cons**                           |
 |------------------ | ----------------------------- | ------------------------------------|
@@ -71,7 +71,18 @@ Our robots are coded in [Python](https://www.python.org/) language using the [ev
 
 We built our own wrappers for [ev3dev](https://github.com/denyahnov/robocup_tools) and the [infrared sensor](https://github.com/denyahnov/ir-seeker). These allowed us to have Custom Menus and ready to use Classes which sped up our coding process.
 
-We run the main chunk of our code in a single main loop, which uses utilities and functions from our main robot class. We use a seperate thread for bluetooth communication, allowing for it to run simultaneousy with the main code. We started off by using [EV3Sim](https://ev3sim.mhsrobotics.club/), an application developed by the school to practice coding in a virtual environment. It helped us build the foundation of our code while working from home.
+We have structured our code very methodically. Python allows us to import code from different files and compile it into one main file:
+- `behaviours.py` stores all our robot behaviours such as Attack, Chase, Defend, Track, etc
+- `brick.py` stores our system functions such as changing brick color and playing a sound
+- `calibration.py` allows us to calibrate our sensors as well as storing the values
+- `comms.py` allows us to connect the 2 robots via bluetooth and send information between them
+- `custom_sensors.py` stores the classes for any custom sensors we use like the IR Seeker
+- `drivebase.py` initalises our motors and stores all our movement functions
+- `main.py` is the main file that we run
+- `menu.py` allows us to run a Graphical User Interface within the program
+- `sensors.py` initalises our sensors and stores all the sensor related functions
+
+We started off by using [EV3Sim](https://ev3sim.mhsrobotics.club/), an application developed by the school to practice coding in a virtual environment. It helped us build the foundation of our code while working from home.
 
 We use a holonomic drive which allows us to move in any direction. We use a simple formula to calculate each motor's speed based on a given angle from 0-360 degrees. 
 
@@ -81,9 +92,9 @@ Our code accounts for robot inconsistency and faulty sensors. The main chunk of 
 
 We use bluetooth for communication between robots. We have one robot run as a server and the other connects afterwards as a client. The robots relay whatever information they recieve between themselves e.g. Ball Possession, Current Attack/Defense State, etc.
 
-We do not use any sensors like touch or colour to detect if the robot has possession of the ball, instead we use the infrared proximity.
+We do not use any sensors like touch or colour to detect if the robot has possession of the ball, instead we use the infrared proximity. We instead use a touch sensor to hit the crossbar of our goal for the robot to know it's position.
 
-We even played with using odometry to locate our robot on the field without the use of sensors. By using the motor degree positions, we could estimate where we were on the field given we calibrate before the match begins. Unfortunately, we found that refrees picking our robots up and robot being knocked over would ruin the data, providing an inaccurate location.
+We even tried using odometry to locate our robot on the field without the use of sensors. By using the motor degree positions, we could estimate where we were on the field given we calibrate before the match begins. Unfortunately, we found that refrees picking our robots up and robot being knocked over would ruin the data, providing an inaccurate location.
 
 We made an easy way for us to debug code and see sensor values by visualing the robot position. We pass it the ball angle and strength, and it returns out an x,y position.
 
@@ -92,6 +103,8 @@ We made an easy way for us to debug code and see sensor values by visualing the 
 We use a cubic function to correct our turning angle based on how far we are from a target angle.
 
 ![CompassFix](https://user-images.githubusercontent.com/60083582/227074173-46f1c8af-d7eb-4157-b3d9-9cbd1b7b24a6.png)
+
+During our testing, we found it hard to see what the robot was actually thinking. This led us to developing a graphical visualiser which could replay matches based on data that the robot saved.
 
 ```mermaid
 graph LR
