@@ -16,9 +16,6 @@ def close_menu(self): raise KeyboardInterrupt
 def main():
 	"""Main loop"""
 
-	# Change brick color to red
-	brick.Color('red')
-
 	kickoff_length = 60
 
 	ball_hold_counter = 0
@@ -47,14 +44,18 @@ def main():
 
 		# If we have the ball long enough, try score
 		if ball_hold_counter > ball_hold_threshold:
+			brick.Color('green')
+			brick.PlayTone(500)
 			behaviours.Score(drivebase,sensors.Values)
 		
 		# Otherwise if we can see the ball, chase it
 		elif ball_strength > 0:
+			brick.Color('orange')
 			behaviours.Chase(drivebase,sensors.Values)
 
 		# If we cannot find the ball, wait
 		else:
+			brick.Color('red')
 			behaviours.Idle(drivebase,sensors.Values)
 
 	# Stop motors and reset brick color 

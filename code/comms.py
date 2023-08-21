@@ -2,7 +2,15 @@
 
 import bluetooth
 
+class State:
+	OFFLINE = 0
+	FINDING = 1
+	ATTACKING = 2
+	DEFENDING = 3
+
 uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
+
+state = State.OFFLINE
 
 def Server():
 	server = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
