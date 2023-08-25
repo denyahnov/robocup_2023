@@ -36,10 +36,12 @@ def ScaleSpeeds(speeds:list,target_value:int = DRIVEBASE_SPEED) -> list:
 def Drive(speeds):
 	global motors
 
-	motors["A"].on(SpeedPercent(-speeds[0]))
-	motors["B"].on(SpeedPercent(speeds[1]))
-	motors["C"].on(SpeedPercent(speeds[2]))
-	motors["D"].on(SpeedPercent(-speeds[3]))
+	speeds = Clamp(speeds)
+
+	motors["A"].run_forever(speed_sp=SpeedPercent(-speeds[0]))
+	motors["B"].run_forever(speed_sp=SpeedPercent(speeds[1]))
+	motors["C"].run_forever(speed_sp=SpeedPercent(speeds[2]))
+	motors["D"].run_forever(speed_sp=SpeedPercent(-speeds[3]))
 
 def Reset():
 	global motors
@@ -51,11 +53,14 @@ def Coast():
 
 	[motors[i].off(brake=False) for i in motors]
 
-def Turn(turn_speed,speeds):
+def Turn(speeds,turn_speed):
 	return [s + turn_speed for s in speeds]
 
 def TurnToHeading(angle):
-	return angle * 2
+	return angle * 1.8
 
 def IsStalled():
 	return any([motors[i].is_stalled for i in motors])
+
+def Clamp(speeds):
+	return [min(100, max(-100,i)) for i in speeds]

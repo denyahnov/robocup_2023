@@ -16,7 +16,7 @@ def Save():
 			"center_distance": center_distance,
 		},file,indent=4)
 
-def Load(self):
+def Load():
 	"""Load calibration data"""
 	global robot_id, debug_mode, goal_heading, center_distance
 	

@@ -16,15 +16,6 @@ def close_menu(self): raise KeyboardInterrupt
 def main():
 	"""Main loop"""
 
-	kickoff_length = 60
-
-	ball_hold_counter = 0
-	ball_hold_threshold = 20 
-
-	# Drive Straight for X amount of time
-	for i in range(kickoff_length):
-		behaviours.Kickoff(drivebase)
-
 	while True:
 
 		# Update button variables
@@ -36,27 +27,21 @@ def main():
 		# Update Sensors
 		sensors.UpdateValues(calibration)
 
-		# Count how long we are in possesion of the ball
-		if sensors.Values.has_ball:
-			ball_hold_counter += 1
-		else:
-			ball_hold_counter = 0
-
 		# If we have the ball long enough, try score
-		if ball_hold_counter > ball_hold_threshold:
-			brick.Color('green')
+		if sensors.Values.has_ball:
+			# brick.Color('red')
 			brick.PlayTone(500)
 			behaviours.Score(drivebase,sensors.Values)
 		
 		# Otherwise if we can see the ball, chase it
-		elif ball_strength > 0:
-			brick.Color('orange')
+		elif sensors.Values.found_ball:
+			# brick.Color('orange')
 			behaviours.Chase(drivebase,sensors.Values)
 
 		# If we cannot find the ball, wait
 		else:
-			brick.Color('red')
-			behaviours.Idle(drivebase,sensors.Values)
+			# brick.Color('green')
+			behaviours.ReturnToGoal(drivebase,sensors.Values)
 
 	# Stop motors and reset brick color 
 	drivebase.Coast()

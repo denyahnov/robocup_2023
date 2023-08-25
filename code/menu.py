@@ -9,6 +9,7 @@ class MenuButton():
 	def __init__(self,text:str="",icon:list=None,script:...=None,args=[]):
 		self.text = text
 		self.icon = icon
+		self.args = args
 		
 		self.script = script
 

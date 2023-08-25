@@ -18,6 +18,8 @@ Compass.mode = "COMPASS"
 # ultrasonic: 		-130 to ~130
 # touch_sensor:		True or False
 # has_ball:			True or False
+# near_ball:		True or False
+# found_ball:		True or False
 
 class Values:
 	ball_angle = 0
@@ -27,11 +29,13 @@ class Values:
 	ultrasonic = 0
 	touch_sensor = False
 	has_ball = False
+	near_ball = False
+	found_ball = False
 
 def UpdateValues(calibration):
 	Values.ball_direction, Values.ball_strength = IR.read()
 
-	Values.ball_angle = ConvertAngle(ball_angle * 30)
+	Values.ball_angle = ConvertAngle(Values.ball_direction * 30)
 
 	Values.compass = GetRelativeAngle(Compass.value(), calibration.goal_heading)
 
@@ -39,7 +43,11 @@ def UpdateValues(calibration):
 
 	Values.touch_sensor = False
 
-	Values.has_ball = HasBall(Values.ball_strength)
+	Values.near_ball = NearBall()
+	
+	Values.has_ball = HasBall()
+
+	Values.found_ball = FoundBall()
 
 def ConvertAngle(angle):
 	"""Convert 0 to 360 degrees -> -180 to 180 degrees"""
@@ -49,5 +57,11 @@ def ConvertAngle(angle):
 def GetRelativeAngle(angle,relation):
 	return ConvertAngle((((angle - relation) % 360) + 360) % 360)
 
-def HasBall(strength):
-	return strength > 50
+def FoundBall():
+	return Values.ball_strength > 0
+
+def HasBall():
+	return (Values.ball_strength >= 60) and (-20 <= Values.ball_angle <= 20)
+
+def NearBall():
+	return Values.ball_strength >= 40

@@ -11,14 +11,17 @@ def Score(drivebase,values):
 	"""Same as `Chase` except it faces the goal"""
 	
 	# If near ball, drive behind it instead of into it
-	if values.has_ball:
-		values.ball_angle *= 1.5
+	if values.near_ball:
+		angle = values.ball_angle * 1.4
+
+	else:
+		angle = values.ball_angle
 
 	# Calculate 4 motor speeds
-	speeds = drivebase.ScaleSpeeds(drivebase.MoveTo(values.ultrasonic / 5))
+	speeds = drivebase.ScaleSpeeds(drivebase.MoveTo(angle))
 	
 	# Turn to fix compass
-	turned_speeds = drivebase.Turn(speeds, drivebase.TurnToHeading(values.compass))
+	turned_speeds = drivebase.Turn(speeds, drivebase.TurnToHeading(values.compass - values.ultrasonic / 4))
 
 	# Start motors
 	return drivebase.Drive(drivebase.ScaleSpeeds(turned_speeds))
@@ -27,11 +30,14 @@ def Chase(drivebase,values):
 	"""Drive towards the ball and face 0 degrees"""
 
 	# If near ball, drive behind it instead of into it
-	if values.has_ball:
-		values.ball_angle *= 1.5
+	if values.near_ball:
+		angle = values.ball_angle * 1.4
+
+	else:
+		angle = values.ball_angle
 
 	# Calculate 4 motor speeds
-	speeds = drivebase.ScaleSpeeds(drivebase.MoveTo(values.ball_angle))
+	speeds = drivebase.ScaleSpeeds(drivebase.MoveTo(angle))
 	
 	# Turn to fix compass
 	turned_speeds = FixCompass(drivebase,values,speeds)
@@ -99,5 +105,9 @@ def Idle(drivebase,values):
 def Kickoff(drivebase,values={}):
 	# Go straight ahead during kickoff
 
+	speeds = drivebase.ScaleSpeeds(drivebase.MoveTo(0))
+
+	turned = drivebase.ScaleSpeeds(FixCompass(speeds))
+
 	# Drive at angle 0
-	return drivebase.Drive(drivebase.ScaleSpeeds(drivebase.MoveTo(0)))
+	return drivebase.Drive(turned)
