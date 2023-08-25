@@ -6,8 +6,6 @@ global motors
 
 motors = {port: MediumMotor("out" + port) for port in "ABCD"}
 
-print()
-
 DRIVEBASE_SPEED = 90
 
 # A and D are negative

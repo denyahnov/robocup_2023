@@ -37,8 +37,10 @@ class Values:
 	near_ball = False
 	found_ball = False
 
+
 def UpdateValues(calibration):
-	Values.ball_direction, Values.ball_strength = IR.read()
+
+	Values.ball_direction, Values.ball_strength = IR.read_averaged(sample_size=3)
 
 	Values.ball_angle = ConvertAngle(Values.ball_direction * 30)
 
