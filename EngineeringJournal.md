@@ -19,7 +19,7 @@
 
 ### **Introduction:**
 
-We are Dennis, Saum and Jones, a group of year 10s from Melbourne High School. We are a small team of 2 and operate on a weekly basis. We have a variety of experience in various robotics competitions and have competed in RoboCup before.
+We are Dennis, Saum and Jones, a group of year 10s from Melbourne High School. We are a small team of 3 and operate on a weekly basis. We have a variety of experience in various robotics competitions and have competed in RoboCup before.
 
 ### **Strategy:**
 **Game:**
