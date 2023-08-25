@@ -49,6 +49,24 @@ class Menu():
 				button_size=self.button_size
 			)
 
+	def Clear(self) -> None:
+		self.display.clear()
+		self.display.update()
+
+	def Update(self) -> None:
+		self.display.update()
+
+	def Print(self,string,line_length=0) -> None:
+		self.Clear()
+
+		if line_length <= 0:
+			self.display.text_pixels(string)
+		else:
+			for idx,line in enumerate([string[i:i+line_length] for i in range(0,len(string),line_length)]):
+				self.display.text_pixels(line,clear_screen=False,y=idx*10)
+
+		self.Update()
+
 	def Run(self) -> None:
 		print("Custom Menu Running")
 

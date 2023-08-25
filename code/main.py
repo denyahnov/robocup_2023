@@ -9,8 +9,6 @@ import behaviours
 
 from menu import Menu, MenuButton
 
-from traceback import print_exc
-
 def close_menu(self): raise KeyboardInterrupt
 
 def main():
@@ -30,7 +28,7 @@ def main():
 		# If we have the ball long enough, try score
 		if sensors.Values.has_ball:
 			# brick.Color('red')
-			brick.PlayTone(500)
+			# brick.PlayTone(500)
 			behaviours.Score(drivebase,sensors.Values)
 		
 		# Otherwise if we can see the ball, chase it
@@ -66,10 +64,19 @@ if __name__ == '__main__':
 
 	try:
 		menu.Run()
+
 	except KeyboardInterrupt:
 		print("Keyboard Interrupt")
-	except:
-		print_exc()
+	
+	except Exception as error:
+
+		drivebase.ForceCoast()
+		brick.Color('red')
+
+		menu.Print(str(error),line_length=25)
+
+		while not brick.buttons.backspace:
+			brick.buttons.process()
 
 	drivebase.Coast()
 	brick.Color('green')

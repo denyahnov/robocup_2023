@@ -9,6 +9,11 @@ Ultrasonic = UltrasonicSensor(INPUT_3)
 
 Compass.mode = "COMPASS"
 
+# Calibration Values
+NEAR_STRENGTH = 55
+HOLD_STRENGTH = 60 
+HOLD_ANGLE = 20
+
 # VALUE DICTIONARY:
 # =============================
 # ball_angle: 		-180 to 180
@@ -61,7 +66,7 @@ def FoundBall():
 	return Values.ball_strength > 0
 
 def HasBall():
-	return (Values.ball_strength >= 60) and (-20 <= Values.ball_angle <= 20)
+	return (Values.ball_strength >= HOLD_STRENGTH) and (-HOLD_ANGLE <= Values.ball_angle <= HOLD_ANGLE)
 
 def NearBall():
-	return Values.ball_strength >= 40
+	return Values.ball_strength >= NEAR_STRENGTH

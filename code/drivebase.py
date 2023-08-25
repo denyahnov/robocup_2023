@@ -6,6 +6,8 @@ global motors
 
 motors = {port: MediumMotor("out" + port) for port in "ABCD"}
 
+print()
+
 DRIVEBASE_SPEED = 90
 
 # A and D are negative
@@ -38,10 +40,10 @@ def Drive(speeds):
 
 	speeds = Clamp(speeds)
 
-	motors["A"].run_forever(speed_sp=SpeedPercent(-speeds[0]))
-	motors["B"].run_forever(speed_sp=SpeedPercent(speeds[1]))
-	motors["C"].run_forever(speed_sp=SpeedPercent(speeds[2]))
-	motors["D"].run_forever(speed_sp=SpeedPercent(-speeds[3]))
+	motors["A"].run_forever(speed_sp=-speeds[0] * motors["A"].max_speed / 100)
+	motors["B"].run_forever(speed_sp=speeds[1] * motors["B"].max_speed / 100)
+	motors["C"].run_forever(speed_sp=speeds[2] * motors["C"].max_speed / 100)
+	motors["D"].run_forever(speed_sp=-speeds[3] * motors["D"].max_speed / 100)
 
 def Reset():
 	global motors
@@ -52,6 +54,15 @@ def Coast():
 	global motors
 
 	[motors[i].off(brake=False) for i in motors]
+
+def ForceCoast():
+	global motors
+
+	for port in motors:
+		try:
+			motors[port].off(brake=False)
+		except:
+			pass
 
 def Turn(speeds,turn_speed):
 	return [s + turn_speed for s in speeds]
