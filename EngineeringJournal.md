@@ -94,7 +94,7 @@ We use bluetooth for communication between robots. We have one robot run as a se
 
 We do not use any sensors like touch or colour to detect if the robot has possession of the ball, instead we use the infrared proximity. We instead use a touch sensor to hit the crossbar of our goal for the robot to know it's position.
 
-We even tried using odometry to locate our robot on the field without the use of sensors. By using the motor degree positions, we could estimate where we were on the field given we calibrate before the match begins. Unfortunately, we found that refrees picking our robots up and robot being knocked over would ruin the data, providing an inaccurate location.
+We even tried using odometry to locate our robot on the field without the use of sensors. By using the motor degree positions, we could estimate where we were on the field given we calibrate before the match begins. Unfortunately, we found that referees picking our robots up and robot being knocked over would ruin the data, providing an inaccurate location.
 
 We made an easy way for us to debug code and see sensor values by visualing the robot position. We pass it the ball angle and strength, and it returns out an x,y position.
 
@@ -163,9 +163,15 @@ remove--> returnUltrasonic
 ![image](https://user-images.githubusercontent.com/60083582/230258454-ddbf192e-e1ab-43d5-89bf-22e2e8469e64.png)
 ![image](https://user-images.githubusercontent.com/60083582/230258480-8d4384aa-320e-462f-9de3-6b786289c59c.png)
 
-#### **Final Design:**
+#### **Design 2 - Version 5:**
 
 ![image](https://user-images.githubusercontent.com/60083582/230258539-e521a508-2f07-4a3d-a17a-2d58501dd646.png)
 ![image](https://user-images.githubusercontent.com/60083582/230258560-5d401c4e-737a-471c-8a9a-25891a8b691b.png)
 
+#### **Victorian States Design:**
 
+![image](https://github.com/denyahnov/robocup_2023/assets/60083582/6d5b1373-2f81-4e98-865d-0b89b5a4a8b5)
+![image](https://github.com/denyahnov/robocup_2023/assets/60083582/328e3627-a649-4c43-9420-3d394e3de9db)
+![image](https://github.com/denyahnov/robocup_2023/assets/60083582/2ee3b8eb-cbce-469b-8b42-47199ec4e8b7)
+![image](https://github.com/denyahnov/robocup_2023/assets/60083582/587b9218-9e17-46f8-aaa7-f8989f75105e)
+![image](https://github.com/denyahnov/robocup_2023/assets/60083582/5a64abe9-954e-47d5-a26f-40be6953225b)
