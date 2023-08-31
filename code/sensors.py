@@ -10,7 +10,7 @@ Ultrasonic = UltrasonicSensor(INPUT_3)
 Compass.mode = "COMPASS"
 
 # Calibration Values
-NEAR_STRENGTH = 55
+NEAR_STRENGTH = 50
 HOLD_STRENGTH = 60 
 HOLD_ANGLE = 20
 

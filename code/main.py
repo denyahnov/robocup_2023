@@ -27,18 +27,14 @@ def main():
 
 		# If we have the ball long enough, try score
 		if sensors.Values.has_ball:
-			# brick.Color('red')
-			# brick.PlayTone(500)
 			behaviours.Score(drivebase,sensors.Values)
 		
 		# Otherwise if we can see the ball, chase it
 		elif sensors.Values.found_ball:
-			# brick.Color('orange')
 			behaviours.Chase(drivebase,sensors.Values)
 
 		# If we cannot find the ball, wait
 		else:
-			# brick.Color('green')
 			behaviours.ReturnToGoal(drivebase,sensors.Values)
 
 	# Stop motors and reset brick color 
