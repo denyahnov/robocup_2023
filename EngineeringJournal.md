@@ -177,6 +177,6 @@ remove--> returnUltrasonic
 ![image](https://github.com/denyahnov/robocup_2023/assets/60083582/5a64abe9-954e-47d5-a26f-40be6953225b)
 
 #### **Australian Nationals Redesign**
-<img src="https://user-images.githubusercontent.com/60083582/265250889-06a9cfff-e295-4625-8d7a-5240a8fb9ef3.png" width="360" />
+<img src="https://user-images.githubusercontent.com/60083582/265250889-06a9cfff-e295-4625-8d7a-5240a8fb9ef3.png" width="400" />
+<img src="https://user-images.githubusercontent.com/60083582/265252366-8d4aa6f5-07aa-4f8b-80b4-f4d2adc59690.png" width="400" />
 
-![NationalsRobotBack](https://github.com/denyahnov/robocup_2023/assets/60083582/8d4aa6f5-07aa-4f8b-80b4-f4d2adc59690)
