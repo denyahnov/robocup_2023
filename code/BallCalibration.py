@@ -28,8 +28,14 @@ def CalibratedValues(values):
 	}
 
 def GetValues():
-	
-	ball_direction, ball_strength = sensors.IR.read()
+
+	front = sensors.frontIR.value() - 5, max([sensors.frontIR.value(i) for i in range(1,5)])
+	back = sensors.backIR.value() + 1, max([sensors.backIR.value(i) for i in range(1,5)])
+
+	if front[1] > back[1]:
+		ball_direction, ball_strength = front
+	else:
+		ball_direction, ball_strength = back
 	
 	ball_angle = sensors.ConvertAngle(ball_direction * 30)
 

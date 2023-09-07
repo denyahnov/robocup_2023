@@ -6,7 +6,7 @@ global motors
 
 motors = {port: MediumMotor("out" + port) for port in "ABCD"}
 
-DRIVEBASE_SPEED = 90
+DRIVEBASE_SPEED = 100
 
 # A and D are negative
 
@@ -36,12 +36,26 @@ def ScaleSpeeds(speeds:list,target_value:int = DRIVEBASE_SPEED) -> list:
 def Drive(speeds):
 	global motors
 
+	speeds = ScaleSpeeds(speeds)
+
 	speeds = Clamp(speeds)
 
 	motors["A"].run_forever(speed_sp=-speeds[0] * motors["A"].max_speed / 100)
 	motors["B"].run_forever(speed_sp=speeds[1] * motors["B"].max_speed / 100)
 	motors["C"].run_forever(speed_sp=speeds[2] * motors["C"].max_speed / 100)
 	motors["D"].run_forever(speed_sp=-speeds[3] * motors["D"].max_speed / 100)
+
+def DriveSeconds(seconds,speeds):
+	global motors
+
+	speeds = ScaleSpeeds(speeds)
+	
+	speeds = Clamp(speeds)
+
+	motors["A"].on_for_seconds(SpeedPercent(-speeds[0]),seconds,block=False)
+	motors["B"].on_for_seconds(SpeedPercent(speeds[1]),seconds,block=False)
+	motors["C"].on_for_seconds(SpeedPercent(speeds[2]),seconds,block=False)
+	motors["D"].on_for_seconds(SpeedPercent(-speeds[3]),seconds,block=True)
 
 def Reset():
 	global motors

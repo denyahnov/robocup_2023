@@ -9,10 +9,16 @@ import behaviours
 
 from menu import Menu, MenuButton
 
-def close_menu(self): raise KeyboardInterrupt
+def close_menu(): raise KeyboardInterrupt
 
 def main():
 	"""Main loop"""
+
+	kickoff_length = 20
+
+	for _ in range(kickoff_length):
+		sensors.UpdateValues(calibration)
+		behaviours.Kickoff(drivebase,sensors.Values)
 
 	while True:
 
@@ -30,7 +36,7 @@ def main():
 			behaviours.Score(drivebase,sensors.Values)
 		
 		# Otherwise if we can see the ball, chase it
-		elif sensors.Values.found_ball:
+		if sensors.Values.found_ball:
 			behaviours.Chase(drivebase,sensors.Values)
 
 		# If we cannot find the ball, wait
@@ -76,5 +82,3 @@ if __name__ == '__main__':
 
 	drivebase.Coast()
 	brick.Color('green')
-
-	sensors.IR.close()

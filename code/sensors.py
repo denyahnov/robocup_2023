@@ -3,15 +3,21 @@ from ev3dev2.sensor.lego import *
 
 from custom_sensors import *
 
-IR = IRSeeker360(INPUT_1)
+frontIR = Sensor(INPUT_1,driver_name="ht-nxt-ir-seek-v2")
+backIR = Sensor(INPUT_4,driver_name="ht-nxt-ir-seek-v2")
 Compass = Sensor(INPUT_2,driver_name="ht-nxt-compass")
 Ultrasonic = UltrasonicSensor(INPUT_3)
+
+frontIR.mode = "AC-ALL"
+backIR.mode = "AC-ALL"
 
 Compass.mode = "COMPASS"
 
 # Calibration Values
-NEAR_STRENGTH = 50
-HOLD_STRENGTH = 60 
+FWD_NEAR_STRENGTH = 90
+SIDE_NEAR_STRENGTH = 40
+FWD_ANGLE = 40
+HOLD_STRENGTH = 140
 HOLD_ANGLE = 20
 
 # VALUE DICTIONARY:
@@ -40,7 +46,13 @@ class Values:
 
 def UpdateValues(calibration):
 
-	Values.ball_direction, Values.ball_strength = IR.read_averaged(sample_size=3)
+	front = frontIR.value() - 5, max([frontIR.value(i) for i in range(1,5)])
+	back = backIR.value() + 1, max([backIR.value(i) for i in range(1,5)])
+
+	if front[1] > back[1]:
+		Values.ball_direction, Values.ball_strength = front
+	else:
+		Values.ball_direction, Values.ball_strength = back
 
 	Values.ball_angle = ConvertAngle(Values.ball_direction * 30)
 
@@ -71,4 +83,9 @@ def HasBall():
 	return (Values.ball_strength >= HOLD_STRENGTH) and (-HOLD_ANGLE <= Values.ball_angle <= HOLD_ANGLE)
 
 def NearBall():
-	return Values.ball_strength >= NEAR_STRENGTH
+	if BallInfront():
+		return Values.ball_strength >= FWD_NEAR_STRENGTH
+	return Values.ball_strength >= SIDE_NEAR_STRENGTH
+
+def BallInfront():
+	return (-FWD_ANGLE < Values.ball_angle < FWD_ANGLE) or (-180 + FWD_ANGLE > Values.ball_angle) or (180 - FWD_ANGLE < Values.ball_angle)

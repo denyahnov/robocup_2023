@@ -12,7 +12,7 @@ def Score(drivebase,values):
 	
 	# If near ball, drive behind it instead of into it
 	if values.near_ball:
-		angle = values.ball_angle * 1.5
+		angle = values.ball_angle * 1.55
 
 	else:
 		angle = values.ball_angle
@@ -21,7 +21,7 @@ def Score(drivebase,values):
 	speeds = drivebase.ScaleSpeeds(drivebase.MoveTo(angle))
 	
 	# Turn to fix compass
-	turned_speeds = drivebase.Turn(speeds, drivebase.TurnToHeading(values.compass - values.ultrasonic / 4))
+	turned_speeds = drivebase.Turn(speeds, drivebase.TurnToHeading(values.compass - values.ultrasonic / 8))
 
 	# Start motors
 	return drivebase.Drive(drivebase.ScaleSpeeds(turned_speeds))
@@ -31,7 +31,7 @@ def Chase(drivebase,values):
 
 	# If near ball, drive behind it instead of into it
 	if values.near_ball:
-		angle = values.ball_angle * 1.5
+		angle = values.ball_angle * 1.55
 
 	else:
 		angle = values.ball_angle
@@ -66,14 +66,14 @@ def Defend(drivebase,values):
 
 def ReturnToGoal(drivebase,values):
 	"""Return to Goal using ultrasonic and touch sensor"""
-
-	# If not centered
-	if not (-10 < values.ultrasonic < 10):
-		return RecenterRobot(drivebase,values)
 	
 	# If robot is stuck on back wall
 	if drivebase.IsStalled():
-		return drivebase.Drive(drivebase.ScaleSpeeds(drivebase.MoveTo(0)))
+		return drivebase.DriveSeconds(0.5,drivebase.ScaleSpeeds(drivebase.MoveTo(0)))
+
+	# If not centered
+	if not (-15 < values.ultrasonic < 15):
+		return RecenterRobot(drivebase,values)
 
 	# Drive backwards
 	return drivebase.Drive(drivebase.ScaleSpeeds(drivebase.MoveTo(180)))
@@ -102,12 +102,12 @@ def Idle(drivebase,values):
 	# Turn to heading 0
 	return drivebase.Drive(FixCompass(drivebase,values,speeds))
 
-def Kickoff(drivebase,values={}):
+def Kickoff(drivebase,values):
 	# Go straight ahead during kickoff
 
 	speeds = drivebase.ScaleSpeeds(drivebase.MoveTo(0))
 
-	turned = drivebase.ScaleSpeeds(FixCompass(speeds))
+	turned = drivebase.ScaleSpeeds(FixCompass(drivebase,values,speeds))
 
 	# Drive at angle 0
 	return drivebase.Drive(turned)
