@@ -2,12 +2,25 @@
 
 import drivebase
 import sensors
-import calibration
 import comms
 import brick
 import behaviours
 
 from menu import Menu, MenuButton
+
+"""
+	A \\__// C
+	
+   Left		Right
+
+	B  Back  D
+
+Front IR 	1
+Compass 	2
+Ultrasonic	3
+Back IR 	4
+			
+"""
 
 def close_menu(): raise KeyboardInterrupt
 
@@ -17,7 +30,7 @@ def main():
 	kickoff_length = 20
 
 	for _ in range(kickoff_length):
-		sensors.UpdateValues(calibration)
+		sensors.UpdateValues()
 		behaviours.Kickoff(drivebase,sensors.Values)
 
 	while True:
@@ -29,7 +42,7 @@ def main():
 		if brick.buttons.enter or brick.buttons.backspace: break
 
 		# Update Sensors
-		sensors.UpdateValues(calibration)
+		sensors.UpdateValues()
 
 		# If we have the ball long enough, try score
 		if sensors.Values.has_ball:
@@ -39,7 +52,7 @@ def main():
 		if sensors.Values.found_ball:
 			behaviours.Chase(drivebase,sensors.Values)
 
-		# If we cannot find the ball, wait
+		# If we cannot find the ball, wait	
 		else:
 			behaviours.ReturnToGoal(drivebase,sensors.Values)
 
@@ -50,15 +63,15 @@ def main():
 # Define all our buttons and functions
 menu_buttons = [
 	MenuButton("Run Program",script=main),
-	MenuButton("Calibrate",script=calibration.Calibrate,args=[brick,drivebase,sensors]),
-	MenuButton("Bluetooth: False",script=comms.Start),
+	MenuButton("Calibrate Field",script=sensors.calibration.CalibrateField,args=[brick,drivebase,sensors]),
+	MenuButton("Calibrate Ball",script=sensors.calibration.CalibrateBall,args=[brick,drivebase,sensors]),
 	MenuButton("Exit",script=close_menu),
 ]
 
 # Create Menu Class
 menu = Menu([2,2], menu_buttons)
 
-calibration.Load()
+sensors.calibration.Load()
 
 # If the program is started run the code
 if __name__ == '__main__':

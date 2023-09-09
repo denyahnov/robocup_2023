@@ -1,6 +1,56 @@
 {
     "robot_id": 0,
-    "center_distance": 0,
+    "debug_mode": false,
     "goal_heading": 0,
-    "debug_mode": false
+    "center_distance": 0,
+    "ball_strengths": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ]
 }
