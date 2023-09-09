@@ -5,4 +5,4 @@
 
 ### Ball Calibration
 
-![image](https://github.com/denyahnov/robocup_2023/assets/60083582/3a112117-53bb-4c09-a30d-2524e5ab34cc)
+![image](https://github.com/denyahnov/robocup_2023/assets/60083582/e2a22535-29b0-49b9-8276-0876570e745f)
