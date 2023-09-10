@@ -8,11 +8,13 @@ sound = Sound()
 display = Display()
 buttons = Button()
 
-sound.set_volume(20)
+VOLUME = 20
+
+sound.set_volume(VOLUME)
 
 def Color(color):
 	leds.set_color('LEFT',color.upper())
 	leds.set_color('RIGHT',color.upper())
 
 def PlayTone(tone,time=0.2):
-	sound.play_tone(tone,time,0,20,sound.PLAY_NO_WAIT_FOR_COMPLETE)
+	sound.play_tone(tone,time,0,VOLUME,sound.PLAY_NO_WAIT_FOR_COMPLETE)

@@ -45,6 +45,15 @@ class Values:
 	near_ball = False
 	found_ball = False
 
+def main_loop():
+	while True:
+		UpdateValues()
+
+def UpdateForever():
+	thread = Thread(target=main_loop)
+	thread.daemon = True
+
+	thread.start()
 
 def UpdateValues():
 

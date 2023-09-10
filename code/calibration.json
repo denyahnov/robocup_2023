@@ -1,6 +1,5 @@
 {
     "robot_id": 0,
-    "debug_mode": false,
     "goal_heading": 0,
     "center_distance": 0,
     "ball_strengths": [

@@ -3,9 +3,9 @@
 from time import sleep
 from json import dump, load
 
-global robot_id, debug_mode, goal_heading, center_distance, ball_strengths
+global robot_id, goal_heading, center_distance, ball_strengths
 
-robot_id, debug_mode, goal_heading, center_distance = 0,False,0,0
+robot_id, goal_heading, center_distance = 0,0,0
 
 ball_strengths = [[0,0] for _ in range(12)]
 
@@ -27,12 +27,11 @@ Ball Calibration Button Guide
 
 def Save():
 	"""Save calibration data"""
-	global robot_id, debug_mode, goal_heading, center_distance, ball_strengths
+	global robot_id, goal_heading, center_distance, ball_strengths
 	
 	with open("calibration.json",'w') as file:
 		dump({
 			"robot_id": robot_id,
-			"debug_mode": debug_mode,
 			"goal_heading": goal_heading,
 			"center_distance": center_distance,
 			"ball_strengths": ball_strengths,
@@ -40,14 +39,13 @@ def Save():
 
 def Load():
 	"""Load calibration data"""
-	global robot_id, debug_mode, goal_heading, center_distance, ball_strengths
+	global robot_id, goal_heading, center_distance, ball_strengths
 	
 	try:
 		with open("calibration.json",'r') as file:
 			temp = load(file)
 
 			robot_id = temp["robot_id"]
-			debug_mode = temp["debug_mode"]
 			goal_heading = temp["goal_heading"]
 			center_distance = temp["center_distance"]
 			ball_strengths = temp["ball_strengths"]
@@ -177,3 +175,9 @@ def CalibrateBall(brick,sensors):
 		print("Closed")
 
 	brick.Color('green')
+
+# == LOAD CALIBRATION DATA == #
+
+Load()
+
+# =========================== #

@@ -42,10 +42,12 @@ except Exception as error:
 def main():
 	"""Main loop"""
 
+	if comms.state == comms.State.CONNECTED:
+		comms.state.RUNNING = True
+
 	kickoff_length = 20
 
 	for _ in range(kickoff_length):
-		sensors.UpdateValues()
 		behaviours.Kickoff(drivebase,sensors.Values)
 
 	while True:
@@ -56,20 +58,38 @@ def main():
 		# Stop program if middle or exit button pressed
 		if brick.buttons.enter or brick.buttons.backspace: break
 
-		# Update Sensors
-		sensors.UpdateValues()
+		if comms.state == comms.State.CONNECTED:
+			teammate_running, teammate_strength = comms.other_data["state"], comms.other_data["ball_strength"]
 
-		# If we have the ball long enough, try score
-		if sensors.Values.has_ball:
-			behaviours.Score(drivebase,sensors.Values)
-		
-		# Otherwise if we can see the ball, chase it
-		if sensors.Values.found_ball:
-			behaviours.Chase(drivebase,sensors.Values)
+			if sensors.Values.has_ball:
+				behaviours.Score(drivebase,sensors.Values)
+			
+			elif sensors.Values.found_ball
+				if teammate_running and teammate_strength > sensors.Values.ball_strength:
+					behaviours.ReturnToGoal(drivebase,sensors.Values)
+	
+				else:
+					behaviours.Chase(drivebase,sensors.Values)
 
-		# If we cannot find the ball, wait	
+			else:
+				behaviours.ReturnToGoal(drivebase,sensors.Values)
+
 		else:
-			behaviours.ReturnToGoal(drivebase,sensors.Values)
+
+			# If we have the ball long enough, try score
+			if sensors.Values.has_ball:
+				behaviours.Score(drivebase,sensors.Values)
+			
+			# Otherwise if we can see the ball, chase it
+			elif sensors.Values.found_ball:
+				behaviours.Chase(drivebase,sensors.Values)
+
+			# If we cannot find the ball, wait	
+			else:
+				behaviours.ReturnToGoal(drivebase,sensors.Values)
+
+	if comms.state == comms.State.CONNECTED:
+		comms.state.RUNNING = False
 
 	# Stop motors and reset brick color 
 	drivebase.Coast()
@@ -80,17 +100,17 @@ menu_buttons = [
 	MenuButton("Run Program",script=main),
 	MenuButton("Calibrate Field",script=sensors.calibration.CalibrateField,args=[brick,drivebase,sensors]),
 	MenuButton("Calibrate Ball",script=sensors.calibration.CalibrateBall,args=[brick,drivebase,sensors]),
-	MenuButton("Bluetooth",script=comms.main_loop,args=[brick,sensors]),
+	MenuButton("Bluetooth",script=comms.Connect,args=[brick,sensors]),
 ]
 
 # Create Menu Class
 menu = Menu([2,2], menu_buttons)
 
-sensors.calibration.Load()
-
 # If the program is started run the code
 if __name__ == '__main__':
 	brick.PlayTone(700)
+	
+	sensors.UpdateForever()
 
 	try:
 		menu.Run()

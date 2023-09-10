@@ -8,13 +8,11 @@ from traceback import print_exc
 
 global state, my_data, other_data
 
-class sensors:
-	ball_strength = 0
-
 class State:
 	OFFLINE = 0
-	PAUSED 	= 1
-	CONNECTED = 2
+	CONNECTED = 1
+
+	RUNNING = False
 
 global host, port
 
@@ -24,12 +22,12 @@ host, port = "2C:6D:C1:08:83:B9", 4
 state = State.OFFLINE
 my_data, other_data = {}, {}
 
-def UpdateData(values):
-	global state,my_data
+def UpdateData(sensors):
+	global my_data
 
 	my_data = {
-		"state": state,
-		"ball_strength": values.ball_strength,
+		"state": State.RUNNING,
+		"ball_strength": sensors.Values.ball_strength,
 	}
 
 def Send(robot_socket):
@@ -53,11 +51,11 @@ def Server():
 
 	server.listen()
 
-	print("Waiting for client at {}, {}".format(host,port))
+	print("Waiting for client at {}".format(host))
 
 	client,addr = server.accept()
 
-	print("Client connected at {}".format(addr))
+	print("Client connected at {}".format(addr[0]))
 
 	state = State.CONNECTED
 
@@ -82,8 +80,10 @@ def CreateSocket():
 	except:
 		return Server(), False
 
-def connected_thread(robot_socket, main_socket, is_client):
+def connected_thread(brick, robot_socket, main_socket, is_client):
 	global state
+
+	TPS = 20
 
 	try:
 		while state != State.OFFLINE:
@@ -91,16 +91,16 @@ def connected_thread(robot_socket, main_socket, is_client):
 
 			if is_client:
 				Send(robot_socket)
-				sleep(0.1)
+				sleep(0.5 / TPS)
 				Receive(robot_socket)
-				sleep(0.1)
+				sleep(0.5 / TPS)
+
 			else:
 				Receive(robot_socket)
-				sleep(0.1)
+				sleep(0.5 / TPS)
 				Send(robot_socket)
-				sleep(0.1)
+				sleep(0.5 / TPS)
 
-			print(other_data)
 	except:
 		print_exc()
 
@@ -108,7 +108,12 @@ def connected_thread(robot_socket, main_socket, is_client):
 
 	main_socket.close()
 
-def main_loop(brick,sensors):
+	if brick != None:
+		brick.PlayTone(410,0.1)
+		brick.PlayTone(390,0.1)
+		brick.PlayTone(380,0.1)
+
+def Connect(brick,sensors):
 	global state
 
 	if brick != None:
@@ -133,20 +138,7 @@ def main_loop(brick,sensors):
 
 	print("Robots Linked!")
 
-	thread = Thread(target=connected_thread,args=[robot_socket, main_socket, is_client])
+	thread = Thread(target=connected_thread,args=[brick, robot_socket, main_socket, is_client])
 	thread.daemon = True
 
 	thread.start()
-
-if __name__ == '__main__':
-	brick = None
-
-	# import brick
-
-	main_loop(brick,sensors)
-
-	import random
-
-	while True:
-		sensors.ball_strength = random.randint(30,140)
-		sleep(0.5)
