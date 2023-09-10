@@ -33,23 +33,16 @@ We found that while powerful robots are good, we wanted a quick robot than could
 **Robot Logic:**
 ```mermaid
 graph LR
-Attacking[Attacking?] -- No --> Aim(Aim at '0' degrees)
-HasBall[Has Ball?] -- No --> TeammateBall[Teammate Has Ball?]
-TeammateBall -- Yes --> Defend((Defend))
-Defend --> SlowDown(Ramp Speed Down) --> CenterRobot(Center the Robot) --> Reverse(Reverse Into Goal)
-TeammateBall -- No --> CheckSensors(Check sensor readings)
-HasBall -- Yes --> Attack((Attack))
-Attack --> AimGoal(Curve towards opponent Goal) --> RampSpeed(Ramp Speed Up)
-CheckSensors --> BallPos[Ball Position?]
-BallPos-- Not Found --> Defend
-BallPos-- Found --> Neutral((Neutral)) --> NeutralSpeed(Neutral Speed) --> GoToBall(Go Towards Ball)
-Connected[Robots Connected?] -- Yes --> A(Send Robot Information)
-A --> B(Receive Teammate Information)
-B --> C(Process Information)
-C --> A
+FoundBall[Robot can see the ball?] -- No --> Return
+FoundBall -- Yes --> Teammate[Teammate has ball?] -- No --> HasBall[Is the robot holding the ball?] -- Yes --> Score(Chase the ball and curve towards the opponent goal)
+HasBall -- No --> Chase(Chase the ball and aim forwards)
+Teammate -- Yes --> Return(Return to the goal)
+
+IsConnected[Are the robots bluetooth connected?] -- Yes --> Send(Send robot information) --> Receive(Receive other robot information)
+Receive --> Process(Process information) --> Send
 ```
 ### **Robot Design:**
-Our design choices for this competition were to use 2 identical robots with 4 EV3 Medium Motors, 1 BBR 360 IRSeeker, 1 I2C Compass Sensor, 1 EV3 Ultrasonic Sensor and an EV3 Touch Sensor. We decided that the identity between robots would help resolve issues and keep code as similar as possible.
+Originally, our design choices for this competition were to use 2 identical robots with 4 EV3 Medium Motors, 1 BBR 360 IRSeeker, 1 I2C Compass Sensor, 1 EV3 Ultrasonic Sensor and an EV3 Touch Sensor. We decided that the identity between robots would help resolve issues and keep code as similar as possible. However after the State Competition, we decided to swap from the 360 sensor to 2 HiTechnic IrSeeker v2 Sensors because of their accuracy and reliability.
 
 Because of the limited time working on the robot in person, we began testing out with [different robot designs](https://github.com/denyahnov/robocup_2023/blob/main/EngineeringJournal.md#photos) using parts from home or [Studio 2.0](https://www.bricklink.com/v2/build/studio.page), a virtual LEGO builder.
 
