@@ -99,23 +99,6 @@ We use a cubic function to correct our turning angle based on how far we are fro
 
 During our testing, we found it hard to see what the robot was actually thinking. This led us to developing a graphical visualiser which could replay matches based on data that the robot saved.
 
-```mermaid
-graph LR
-input[Sensor Input] -- Infrared --> IrInput(Return value from 0-11)
-input -- Compass --> cInput[Compass value?]
-cInput -- 3-179 --> left(Curve left)
-cInput -- 180-356 --> right(Curve Right)
-cInput -- Else --> straight(Do nothing)
-right --> formula(Curve speed = angle from '0')
-left --> formula
-input -- Ultrasonic --> question[Greater than 20cm change from average of previous values?]
-question -- Yes --> dont(Do nothing)
-question -- No --> do(Append value to previous values)
-do --> remove(Remove last value in list)
-dont --> returnUltrasonic(Return list)
-remove--> returnUltrasonic
-```
-
 ![IrSensorValues](https://user-images.githubusercontent.com/60083582/185833817-af29420e-4e08-4fae-9abd-7d05557f1ff4.png)
 ![CompassValue](https://user-images.githubusercontent.com/60083582/186033284-3bef35e7-2be7-4249-83a1-fac46f4491df.png)
 
