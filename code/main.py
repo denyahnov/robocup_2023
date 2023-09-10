@@ -42,8 +42,7 @@ except Exception as error:
 def main():
 	"""Main loop"""
 
-	if comms.state == comms.State.CONNECTED:
-		comms.state.RUNNING = True
+	comms.State.RUNNING = True
 
 	kickoff_length = 20
 
@@ -88,8 +87,7 @@ def main():
 			else:
 				behaviours.ReturnToGoal(drivebase,sensors.Values)
 
-	if comms.state == comms.State.CONNECTED:
-		comms.state.RUNNING = False
+	comms.State.RUNNING = False
 
 	# Stop motors and reset brick color 
 	drivebase.Coast()
