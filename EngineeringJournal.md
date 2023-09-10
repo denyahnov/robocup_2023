@@ -33,23 +33,16 @@ We found that while powerful robots are good, we wanted a quick robot than could
 **Robot Logic:**
 ```mermaid
 graph LR
-Attacking[Attacking?] -- No --> Aim(Aim at '0' degrees)
-HasBall[Has Ball?] -- No --> TeammateBall[Teammate Has Ball?]
-TeammateBall -- Yes --> Defend((Defend))
-Defend --> SlowDown(Ramp Speed Down) --> CenterRobot(Center the Robot) --> Reverse(Reverse Into Goal)
-TeammateBall -- No --> CheckSensors(Check sensor readings)
-HasBall -- Yes --> Attack((Attack))
-Attack --> AimGoal(Curve towards opponent Goal) --> RampSpeed(Ramp Speed Up)
-CheckSensors --> BallPos[Ball Position?]
-BallPos-- Not Found --> Defend
-BallPos-- Found --> Neutral((Neutral)) --> NeutralSpeed(Neutral Speed) --> GoToBall(Go Towards Ball)
-Connected[Robots Connected?] -- Yes --> A(Send Robot Information)
-A --> B(Receive Teammate Information)
-B --> C(Process Information)
-C --> A
+FoundBall[Robot can see the ball?] -- No --> Return
+FoundBall -- Yes --> Teammate[Teammate has ball?] -- No --> HasBall[Is the robot holding the ball?] -- Yes --> Score(Chase the ball and curve towards the opponent goal)
+HasBall -- No --> Chase(Chase the ball and aim forwards)
+Teammate -- Yes --> Return(Return to the goal)
+
+IsConnected[Are the robots bluetooth connected?] -- Yes --> Send(Send robot information) --> Receive(Receive other robot information)
+Receive --> Process(Process information) --> Send
 ```
 ### **Robot Design:**
-Our design choices for this competition were to use 2 identical robots with 4 EV3 Medium Motors, 1 BBR 360 IRSeeker, 1 I2C Compass Sensor, 1 EV3 Ultrasonic Sensor and an EV3 Touch Sensor. We decided that the identity between robots would help resolve issues and keep code as similar as possible.
+Originally, our design choices for this competition were to use 2 identical robots with 4 EV3 Medium Motors, 1 BBR 360 IRSeeker, 1 I2C Compass Sensor, 1 EV3 Ultrasonic Sensor and an EV3 Touch Sensor. We decided that the identity between robots would help resolve issues and keep code as similar as possible. However after the State Competition, we decided to swap from the 360 sensor to 2 HiTechnic IrSeeker v2 Sensors because of their accuracy and reliability.
 
 Because of the limited time working on the robot in person, we began testing out with [different robot designs](https://github.com/denyahnov/robocup_2023/blob/main/EngineeringJournal.md#photos) using parts from home or [Studio 2.0](https://www.bricklink.com/v2/build/studio.page), a virtual LEGO builder.
 
@@ -105,23 +98,6 @@ We use a cubic function to correct our turning angle based on how far we are fro
 ![CompassFix](https://user-images.githubusercontent.com/60083582/227074173-46f1c8af-d7eb-4157-b3d9-9cbd1b7b24a6.png)
 
 During our testing, we found it hard to see what the robot was actually thinking. This led us to developing a graphical visualiser which could replay matches based on data that the robot saved.
-
-```mermaid
-graph LR
-input[Sensor Input] -- Infrared --> IrInput(Return value from 0-11)
-input -- Compass --> cInput[Compass value?]
-cInput -- 3-179 --> left(Curve left)
-cInput -- 180-356 --> right(Curve Right)
-cInput -- Else --> straight(Do nothing)
-right --> formula(Curve speed = angle from '0')
-left --> formula
-input -- Ultrasonic --> question[Greater than 20cm change from average of previous values?]
-question -- Yes --> dont(Do nothing)
-question -- No --> do(Append value to previous values)
-do --> remove(Remove last value in list)
-dont --> returnUltrasonic(Return list)
-remove--> returnUltrasonic
-```
 
 ![IrSensorValues](https://user-images.githubusercontent.com/60083582/185833817-af29420e-4e08-4fae-9abd-7d05557f1ff4.png)
 ![CompassValue](https://user-images.githubusercontent.com/60083582/186033284-3bef35e7-2be7-4249-83a1-fac46f4491df.png)
