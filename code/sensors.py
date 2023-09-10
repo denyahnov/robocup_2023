@@ -15,6 +15,8 @@ backIR.mode = "AC-ALL"
 
 Compass.mode = "COMPASS"
 
+Ultrasonic.mode = "US-DIST-CM"
+
 # Calibration Values
 HOLD_ANGLE = 20
 
