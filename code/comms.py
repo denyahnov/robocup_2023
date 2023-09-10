@@ -16,6 +16,15 @@ class State:
 
 global host, port
 
+# Go to 'Network & Connections' tab 
+# Set Bluetooth to 'Powered', 'Visible' and 'Start Scan'
+# Find the other robot in the 'Scanned Devices' page and connect to it
+# Confirm whatever popup appears
+# Get the bluetooth address and put it into here
+
+# 'hciconfig' on Linux
+# 'ipconfig /all' on Windows
+
 host, port = "2C:6D:C1:08:83:B9", 4
 # host, port = "00:17:E9:B1:9F:04", 4
 
