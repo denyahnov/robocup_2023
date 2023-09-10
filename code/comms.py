@@ -1,54 +1,152 @@
 #!/usr/bin/env python3
 
-import bluetooth
+import socket
+from time import sleep
+from json import loads,dumps
+from threading import Thread
+from traceback import print_exc
+
+global state, my_data, other_data
+
+class sensors:
+	ball_strength = 0
 
 class State:
 	OFFLINE = 0
-	FINDING = 1
-	ATTACKING = 2
-	DEFENDING = 3
+	PAUSED 	= 1
+	CONNECTED = 2
 
-uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
+global host, port
+
+host, port = "2C:6D:C1:08:83:B9", 4
+# host, port = "00:17:E9:B1:9F:04", 4
 
 state = State.OFFLINE
+my_data, other_data = {}, {}
+
+def UpdateData(values):
+	global state,my_data
+
+	my_data = {
+		"state": state,
+		"ball_strength": values.ball_strength,
+	}
+
+def Send(robot_socket):
+	global my_data
+
+	robot_socket.send(dumps(my_data).encode('utf-8'))
+
+def Receive(robot_socket):
+	global other_data
+
+	data = robot_socket.recv(1024)
+
+	other_data = loads(data.decode('utf-8'))
 
 def Server():
-	server = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+	global state
+	global host, port
 
-	server.bind(("",bluetooth.PORT_ANY))
-	server.listen(1)
+	server = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+	server.bind((host,port))
 
-	ip,port = server.getsockname()
+	server.listen()
 
+	print("Waiting for client at {}, {}".format(host,port))
 
-	bluetooth.advertise_service(
-		server, 
-		"RobotServer", 
-		service_id=uuid,
-		service_classes=[uuid, bluetooth.SERIAL_PORT_CLASS],
-		profiles=[bluetooth.SERIAL_PORT_PROFILE],
-	)
+	client,addr = server.accept()
 
-	print(ip,port)
+	print("Client connected at {}".format(addr))
 
-	client, info = server.accept()
+	state = State.CONNECTED
 
-	print(client,info)
-
-	client.close()
-	server.close()
+	return client,server
 
 def Client():
-	service_matches = bluetooth.find_service(uuid=uuid)
+	global state
+	global host, port
 
-	server = service_matches[0]
+	client = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+	client.settimeout(3)
 
-	print(server)
+	client.connect((host, port))
 
-	client = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-	client.connect((server["host"], server["port"]))
+	state = State.CONNECTED
 
-	client.close()
+	return client,client
 
-def Start():
-	pass
+def CreateSocket():
+	try:
+		return Client(), True
+	except:
+		return Server(), False
+
+def connected_thread(robot_socket, main_socket, is_client):
+	global state
+
+	try:
+		while state != State.OFFLINE:
+			UpdateData(sensors)
+
+			if is_client:
+				Send(robot_socket)
+				sleep(0.1)
+				Receive(robot_socket)
+				sleep(0.1)
+			else:
+				Receive(robot_socket)
+				sleep(0.1)
+				Send(robot_socket)
+				sleep(0.1)
+
+			print(other_data)
+	except:
+		print_exc()
+
+	state = State.OFFLINE
+
+	main_socket.close()
+
+def main_loop(brick,sensors):
+	global state
+
+	if brick != None:
+		brick.Color('orange')
+
+	try:
+		(robot_socket, main_socket), is_client = CreateSocket()
+	except:
+		print_exc()
+
+		if brick != None:
+			brick.PlayTone(300,0.2)
+		
+			brick.Color('green')
+
+		return
+
+	if brick != None:
+		brick.PlayTone(650,0.2)
+
+		brick.Color('green')
+
+	print("Robots Linked!")
+
+	thread = Thread(target=connected_thread,args=[robot_socket, main_socket, is_client])
+	thread.daemon = True
+
+	thread.start()
+
+if __name__ == '__main__':
+	brick = None
+
+	# import brick
+
+	main_loop(brick,sensors)
+
+	import random
+
+	while True:
+		sensors.ball_strength = random.randint(30,140)
+		sleep(0.5)

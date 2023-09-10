@@ -1,13 +1,5 @@
 #!/usr/bin/env python3
 
-import drivebase
-import sensors
-import comms
-import brick
-import behaviours
-
-from menu import Menu, MenuButton
-
 """
 	A \\__// C
 	
@@ -22,7 +14,30 @@ Back IR 	4
 			
 """
 
-def close_menu(): raise KeyboardInterrupt
+import brick
+import comms
+import behaviours
+
+from menu import Menu, MenuButton
+
+# Handle Import Errors (Cable Not Connected)
+try:
+	import drivebase
+	import sensors
+except Exception as error:
+
+	empty_menu = Menu([1,1],[])
+
+	brick.Color('red')
+
+	empty_menu.Print(str(error),line_length=25)
+
+	while not brick.buttons.backspace:
+		brick.buttons.process()
+
+	brick.Color('green')
+
+	exit(error)
 
 def main():
 	"""Main loop"""
@@ -65,7 +80,7 @@ menu_buttons = [
 	MenuButton("Run Program",script=main),
 	MenuButton("Calibrate Field",script=sensors.calibration.CalibrateField,args=[brick,drivebase,sensors]),
 	MenuButton("Calibrate Ball",script=sensors.calibration.CalibrateBall,args=[brick,drivebase,sensors]),
-	MenuButton("Exit",script=close_menu),
+	MenuButton("Bluetooth",script=comms.main_loop,args=[brick,sensors]),
 ]
 
 # Create Menu Class
