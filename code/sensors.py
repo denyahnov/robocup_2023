@@ -46,8 +46,10 @@ class Values:
 
 def UpdateValues():
 
-	front = (frontIR.value() - 5) % 12, max([frontIR.value(i + 1) for i in range(5)])
-	back = (backIR.value() + 1) % 12, max([backIR.value(i + 1) for i in range(5)])
+	raw_front, raw_back = frontIR.value(), backIR.value()
+
+	front = (raw_front - 5) % 12, max([frontIR.value(i + 1) for i in range(5)])
+	back = (raw_back + 1) % 12, max([backIR.value(i + 1) for i in range(5)])
 
 	if front[1] > back[1]:
 		Values.ball_direction, Values.ball_strength = front
@@ -66,7 +68,7 @@ def UpdateValues():
 	
 	Values.has_ball = HasBall()
 
-	Values.found_ball = FoundBall()
+	Values.found_ball = (raw_front + raw_back) != 0 and FoundBall()
 
 def ConvertAngle(angle):
 	"""Convert 0 to 360 degrees -> -180 to 180 degrees"""
