@@ -5,6 +5,8 @@ from custom_sensors import *
 
 import calibration
 
+from threading import Thread
+
 frontIR = Sensor(INPUT_1,driver_name="ht-nxt-ir-seek-v2")
 backIR = Sensor(INPUT_4,driver_name="ht-nxt-ir-seek-v2")
 Compass = Sensor(INPUT_2,driver_name="ht-nxt-compass")

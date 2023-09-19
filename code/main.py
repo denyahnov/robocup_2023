@@ -42,7 +42,7 @@ except Exception as error:
 def main():
 	"""Main loop"""
 
-	comms.State.RUNNING = True
+	comms.RUNNING = True
 
 	kickoff_length = 20
 
@@ -57,13 +57,15 @@ def main():
 		# Stop program if middle or exit button pressed
 		if brick.buttons.enter or brick.buttons.backspace: break
 
+		sensors.UpdateValues()
+
 		if comms.state == comms.State.CONNECTED:
 			teammate_running, teammate_strength = comms.other_data["state"], comms.other_data["ball_strength"]
 
 			if sensors.Values.has_ball:
 				behaviours.Score(drivebase,sensors.Values)
 			
-			elif sensors.Values.found_ball
+			elif sensors.Values.found_ball:
 				if teammate_running and teammate_strength > sensors.Values.ball_strength:
 					behaviours.ReturnToGoal(drivebase,sensors.Values)
 	
@@ -87,7 +89,7 @@ def main():
 			else:
 				behaviours.ReturnToGoal(drivebase,sensors.Values)
 
-	comms.State.RUNNING = False
+	comms.RUNNING = False
 
 	# Stop motors and reset brick color 
 	drivebase.Coast()
@@ -97,7 +99,7 @@ def main():
 menu_buttons = [
 	MenuButton("Run Program",script=main),
 	MenuButton("Calibrate Field",script=sensors.calibration.CalibrateField,args=[brick,drivebase,sensors]),
-	MenuButton("Calibrate Ball",script=sensors.calibration.CalibrateBall,args=[brick,drivebase,sensors]),
+	MenuButton("Calibrate Ball",script=sensors.calibration.CalibrateBall,args=[brick,sensors]),
 	MenuButton("Bluetooth",script=comms.Connect,args=[brick,sensors]),
 ]
 
@@ -108,8 +110,6 @@ menu = Menu([2,2], menu_buttons)
 if __name__ == '__main__':
 	brick.PlayTone(700)
 	
-	sensors.UpdateForever()
-
 	try:
 		menu.Run()
 

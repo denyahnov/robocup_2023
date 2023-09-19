@@ -8,11 +8,13 @@ from traceback import print_exc
 
 global state, my_data, other_data
 
+global RUNNING
+
+RUNNING = False
+
 class State:
 	OFFLINE = 0
 	CONNECTED = 1
-
-	RUNNING = False
 
 global host, port
 
@@ -32,12 +34,18 @@ state = State.OFFLINE
 my_data, other_data = {}, {}
 
 def UpdateData(sensors):
-	global my_data
+	global my_data, RUNNING
 
-	my_data = {
-		"state": State.RUNNING,
-		"ball_strength": sensors.Values.ball_strength,
-	}
+	if sensors != None:
+		my_data = {
+			"state": RUNNING,
+			"ball_strength": sensors.Values.ball_strength,
+		}
+	else:
+		my_data = {
+			"state": RUNNING,
+			"ball_strength": 0,
+		}
 
 def Send(robot_socket):
 	global my_data
@@ -151,3 +159,16 @@ def Connect(brick,sensors):
 	thread.daemon = True
 
 	thread.start()
+
+if __name__ == '__main__':
+	brick = None
+	sensors = None
+
+	# import brick, sensors
+
+	Connect(brick,sensors)
+
+	while state != State.OFFLINE:
+		print(other_data)
+
+	print("Connection Lost!")
