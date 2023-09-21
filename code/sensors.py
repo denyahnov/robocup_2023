@@ -35,6 +35,7 @@ HOLD,NEAR = 0,1 # Used for getting ball calibration data
 # has_ball:			True or False
 # near_ball:		True or False
 # found_ball:		True or False
+# robot_running:	True or False
 
 class Values:
 	ball_angle = 0
@@ -46,6 +47,8 @@ class Values:
 	has_ball = False
 	near_ball = False
 	found_ball = False
+
+	robot_running = False
 
 def main_loop():
 	while True:
@@ -92,7 +95,7 @@ def GetRelativeAngle(angle,relation):
 	return ConvertAngle((((angle - relation) % 360) + 360) % 360)
 
 def FoundBall():
-	return Values.ball_strength > 0
+	return Values.ball_strength > 3
 
 def HasBall():
 	return (Values.ball_strength >= calibration.ball_strengths[Values.ball_direction][HOLD]) and (-HOLD_ANGLE <= Values.ball_angle <= HOLD_ANGLE)

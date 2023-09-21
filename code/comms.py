@@ -8,10 +8,6 @@ from traceback import print_exc
 
 global state, my_data, other_data
 
-global RUNNING
-
-RUNNING = False
-
 class State:
 	OFFLINE = 0
 	CONNECTED = 1
@@ -27,25 +23,26 @@ global host, port
 # 'hciconfig' on Linux
 # 'ipconfig /all' on Windows
 
-host, port = "2C:6D:C1:08:83:B9", 4
-# host, port = "00:17:E9:B1:9F:04", 4
+addresses = {
+	"Dennis Laptop": "2C:6D:C1:08:83:B9",
+	"Dennis Home Robot": "00:17:E9:B1:9F:04",
+	"Green Robot": "24:71:89:49:AE:45",
+	"Multicolor Robot": "CC:78:AB:34:70:7C",
+}
+
+host, port = addresses["Green Robot"], 4
 
 state = State.OFFLINE
 my_data, other_data = {}, {}
 
 def UpdateData(sensors):
-	global my_data, RUNNING
+	global my_data
 
-	if sensors != None:
-		my_data = {
-			"state": RUNNING,
-			"ball_strength": sensors.Values.ball_strength,
-		}
-	else:
-		my_data = {
-			"state": RUNNING,
-			"ball_strength": 0,
-		}
+	my_data = {
+		"state": sensors.Values.robot_running,
+		"ball_strength": sensors.Values.ball_strength,
+		"has_ball": sensors.Values.has_ball,
+	}
 
 def Send(robot_socket):
 	global my_data
@@ -83,7 +80,7 @@ def Client():
 	global host, port
 
 	client = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-	client.settimeout(3)
+	client.settimeout(10)
 
 	client.connect((host, port))
 
@@ -94,10 +91,12 @@ def Client():
 def CreateSocket():
 	try:
 		return Client(), True
+	except socket.timeout:
+		return None
 	except:
 		return Server(), False
 
-def connected_thread(brick, robot_socket, main_socket, is_client):
+def connected_thread(brick, sensors, robot_socket, main_socket, is_client):
 	global state
 
 	TPS = 20
@@ -125,50 +124,35 @@ def connected_thread(brick, robot_socket, main_socket, is_client):
 
 	main_socket.close()
 
-	if brick != None:
-		brick.PlayTone(410,0.1)
-		brick.PlayTone(390,0.1)
-		brick.PlayTone(380,0.1)
+	brick.PlayTone(410,0.1)
+	brick.PlayTone(390,0.1)
+	brick.PlayTone(380,0.1)
 
 def Connect(brick,sensors):
 	global state
 
-	if brick != None:
-		brick.Color('orange')
+	brick.Color('orange')
 
 	try:
 		(robot_socket, main_socket), is_client = CreateSocket()
+
+		print(["Server","Client"][int(is_client)])
 	except:
 		print_exc()
 
-		if brick != None:
-			brick.PlayTone(300,0.2)
+		brick.PlayTone(300,0.2)
 		
-			brick.Color('green')
+		brick.Color('green')
 
 		return
 
-	if brick != None:
-		brick.PlayTone(650,0.2)
+	brick.PlayTone(650,0.2)
 
-		brick.Color('green')
+	brick.Color('green')
 
 	print("Robots Linked!")
 
-	thread = Thread(target=connected_thread,args=[brick, robot_socket, main_socket, is_client])
+	thread = Thread(target=connected_thread,args=[brick, sensors, robot_socket, main_socket, is_client])
 	thread.daemon = True
 
 	thread.start()
-
-if __name__ == '__main__':
-	brick = None
-	sensors = None
-
-	# import brick, sensors
-
-	Connect(brick,sensors)
-
-	while state != State.OFFLINE:
-		print(other_data)
-
-	print("Connection Lost!")

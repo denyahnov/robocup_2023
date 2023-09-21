@@ -42,7 +42,7 @@ except Exception as error:
 def main():
 	"""Main loop"""
 
-	comms.RUNNING = True
+	sensors.Values.robot_running = True
 
 	kickoff_length = 20
 
@@ -60,13 +60,12 @@ def main():
 		sensors.UpdateValues()
 
 		if comms.state == comms.State.CONNECTED:
-			teammate_running, teammate_strength = comms.other_data["state"], comms.other_data["ball_strength"]
 
 			if sensors.Values.has_ball:
 				behaviours.Score(drivebase,sensors.Values)
 			
 			elif sensors.Values.found_ball:
-				if teammate_running and teammate_strength > sensors.Values.ball_strength:
+				if comms.other_data["state"] and comms.other_data["has_ball"]:
 					behaviours.ReturnToGoal(drivebase,sensors.Values)
 	
 				else:
@@ -89,7 +88,7 @@ def main():
 			else:
 				behaviours.ReturnToGoal(drivebase,sensors.Values)
 
-	comms.RUNNING = False
+	sensors.Values.robot_running = False
 
 	# Stop motors and reset brick color 
 	drivebase.Coast()

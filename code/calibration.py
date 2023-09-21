@@ -121,6 +121,8 @@ def CalibrateBall(brick,sensors):
 	try:
 		while True:
 
+			sensors.UpdateValues()
+
 			direction, strength = sensors.Values.ball_direction, sensors.Values.ball_strength
 
 			if brick.buttons.backspace: 
