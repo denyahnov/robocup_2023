@@ -43,6 +43,7 @@ class Values:
 	ball_strength = 0
 	compass = 0
 	ultrasonic = 0
+	last_ultrasonic = 0
 	touch_sensor = False
 	has_ball = False
 	near_ball = False
@@ -61,6 +62,8 @@ def UpdateForever():
 	thread.start()
 
 def UpdateValues():
+
+	Values.last_ultrasonic = Values.ultrasonic
 
 	raw_front, raw_back = frontIR.value(), backIR.value()
 

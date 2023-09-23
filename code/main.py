@@ -59,6 +59,7 @@ def main():
 
 		sensors.UpdateValues()
 
+
 		if comms.state == comms.State.CONNECTED:
 
 			if sensors.Values.has_ball:

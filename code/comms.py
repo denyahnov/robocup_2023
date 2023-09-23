@@ -131,6 +131,10 @@ def connected_thread(brick, sensors, robot_socket, main_socket, is_client):
 def Connect(brick,sensors):
 	global state
 
+	if state == State.CONNECTED:
+		brick.PlayTone(300,0.1)
+		return
+
 	brick.Color('orange')
 
 	try:

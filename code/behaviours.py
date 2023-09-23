@@ -12,7 +12,7 @@ def Score(drivebase,values):
 	
 	# If near ball, drive behind it instead of into it
 	if values.near_ball:
-		angle = values.ball_angle * 1.6
+		angle = values.ball_angle * 1.7
 
 	else:
 		angle = values.ball_angle
@@ -31,7 +31,7 @@ def Chase(drivebase,values):
 
 	# If near ball, drive behind it instead of into it
 	if values.near_ball:
-		angle = values.ball_angle * 1.6
+		angle = values.ball_angle * 1.7
 
 	else:
 		angle = values.ball_angle
@@ -72,8 +72,12 @@ def ReturnToGoal(drivebase,values):
 		return drivebase.DriveSeconds(0.5,drivebase.ScaleSpeeds(drivebase.MoveTo(0)))
 
 	# If not centered
-	if not (-15 < values.ultrasonic < 15):
+	if not (-10 < values.ultrasonic < 10):
 		return RecenterRobot(drivebase,values)
+
+	if abs(values.last_ultrasonic - values.ultrasonic) > 50:
+		# Drive forwards if we reach the goal (large ultrasonic change)
+		return drivebase.DriveSeconds(0.2,drivebase.ScaleSpeeds(drivebase.MoveTo(0)))
 
 	# Drive backwards
 	return drivebase.Drive(drivebase.ScaleSpeeds(drivebase.MoveTo(180)))
