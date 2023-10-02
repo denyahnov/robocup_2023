@@ -1,4 +1,3 @@
-# `NOT FINISHED YET!`
 # Menacing Monkeys
 ## Soccer Standard - *2023 RoboCup Junior Australia*
 
