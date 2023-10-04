@@ -6,7 +6,7 @@ global motors
 
 motors = {port: MediumMotor("out" + port) for port in "ABCD"}
 
-DRIVEBASE_SPEED = 100
+DRIVEBASE_SPEED = 80
 
 # A and D are negative
 
@@ -80,7 +80,7 @@ def Turn(speeds,turn_speed):
 	return [s + turn_speed for s in speeds]
 
 def TurnToHeading(angle):
-	return angle * 1.8
+	return angle * 1
 
 def IsStalled():
 	return any([motors[i].is_stalled for i in motors])

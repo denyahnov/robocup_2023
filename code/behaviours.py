@@ -12,7 +12,7 @@ def Score(drivebase,values):
 	
 	# If near ball, drive behind it instead of into it
 	if values.near_ball:
-		angle = values.ball_angle * 1.7
+		angle = values.ball_angle * 1.4
 
 	else:
 		angle = values.ball_angle
@@ -31,7 +31,7 @@ def Chase(drivebase,values):
 
 	# If near ball, drive behind it instead of into it
 	if values.near_ball:
-		angle = values.ball_angle * 1.7
+		angle = values.ball_angle * 1.4
 
 	else:
 		angle = values.ball_angle
