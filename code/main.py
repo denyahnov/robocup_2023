@@ -63,7 +63,7 @@ def main():
 		if comms.state == comms.State.CONNECTED:
 
 			if sensors.Values.has_ball:
-				behaviours.Chase(drivebase,sensors.Values)
+				behaviours.Score(drivebase,sensors.Values)
 			
 			elif sensors.Values.found_ball:
 				if comms.other_data["state"] and comms.other_data["has_ball"]:
@@ -79,7 +79,7 @@ def main():
 
 			# If we have the ball long enough, try score
 			if sensors.Values.has_ball:
-				behaviours.Chase(drivebase,sensors.Values)
+				behaviours.Score(drivebase,sensors.Values)
 			
 			# Otherwise if we can see the ball, chase it
 			elif sensors.Values.found_ball:

@@ -21,7 +21,7 @@ def Score(drivebase,values):
 	speeds = drivebase.ScaleSpeeds(drivebase.MoveTo(angle))
 	
 	# Turn to fix compass
-	turned_speeds = drivebase.Turn(speeds, drivebase.TurnToHeading(values.compass - values.ultrasonic / 8))
+	turned_speeds = drivebase.Turn(speeds, drivebase.TurnToHeading(values.ultrasonic))
 
 	# Start motors
 	return drivebase.Drive(drivebase.ScaleSpeeds(turned_speeds))

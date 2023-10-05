@@ -77,7 +77,9 @@ def UpdateValues():
 
 	Values.ball_angle = ConvertAngle(Values.ball_direction * 30)
 
-	Values.compass = GetRelativeAngle(Compass.value(), calibration.goal_heading)
+	Values.raw_compass = Compass.value()
+
+	Values.compass = GetRelativeAngle(Values.raw_compass, calibration.goal_heading)
 
 	Values.ultrasonic = Ultrasonic.distance_centimeters - calibration.center_distance
 

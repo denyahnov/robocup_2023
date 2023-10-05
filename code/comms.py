@@ -89,7 +89,7 @@ def Client():
 	global host_client, port
 
 	client = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-	client.settimeout(10)
+	client.settimeout(15)
 
 	client.connect((host_client, port))
 
