@@ -14,14 +14,14 @@ new2 = [i % 360 for i in b]
 
 fig, ax = plt.subplots()
 
-ax.plot(a,label="raw")
+# ax.plot(a,label="raw")
 # ax.plot(b,label="head")
-# ax.plot(c,label="final")
+ax.plot(c,label="final")
 # ax.plot(new,label="new")
 
 ax.plot(d)
-# ax.plot(e)
-ax.plot(f)
+ax.plot(e)
+# ax.plot(f)
 
 leg = plt.legend(loc='upper center')
 

@@ -99,7 +99,7 @@ def main():
 menu_buttons = [
 	MenuButton("Run Program",script=main),
 	MenuButton("Calibrate Field",script=sensors.calibration.CalibrateField,args=[brick,drivebase,sensors]),
-	MenuButton("Calibrate Ball",script=sensors.calibration.CalibrateBall,args=[brick,sensors]),
+	MenuButton("Calibrate Compass",script=sensors.calibration.CalibrateCompass,args=[brick,drivebase,sensors]),
 	MenuButton("Bluetooth",script=comms.Connect,args=[brick,sensors]),
 ]
 

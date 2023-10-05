@@ -56,6 +56,26 @@ def Load():
 	except FileNotFoundError:
 		Save()
 
+def CalibrateCompass(brick,drivebase,sensors):
+	global goal_heading
+
+	brick.Color('orange')
+
+	# Use Compass graph to find most accurate heading
+	goldilocks_heading = 50
+
+	while not brick.buttons.enter:
+		compass = sensors.ConvertAngle((sensors.Compass.value() - goldilocks_heading) % 360)
+
+		drivebase.Drive(drivebase.Turn([0,0,0,0],drivebase.TurnToHeading(compass)), scale_speeds=False)
+
+		if -1 <= compass <= 1:
+			brick.PlayTone(600,time=0.5)
+
+	drivebase.Coast()
+
+	brick.Color('green')
+
 def CalibrateField(brick,drivebase,sensors):
 	"""Calibrate all sensors, Reset motor positions and read goal heading + wall distance"""
 

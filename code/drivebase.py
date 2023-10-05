@@ -33,10 +33,11 @@ def ScaleSpeeds(speeds:list,target_value:int = DRIVEBASE_SPEED) -> list:
 
 	return [round(s * (target_value / greatest)) for s in speeds]
 
-def Drive(speeds):
+def Drive(speeds,scale_speeds=True):
 	global motors
 
-	speeds = ScaleSpeeds(speeds)
+	if scale_speeds:
+		speeds = ScaleSpeeds(speeds)
 
 	speeds = Clamp(speeds)
 
