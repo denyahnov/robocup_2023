@@ -3,6 +3,9 @@
 from time import sleep
 from json import dump, load
 
+# GREEN ROBOT 	= ID 0
+# MULTICOLOR 	= ID 1
+
 global robot_id, goal_heading, center_distance, ball_strengths
 
 robot_id, goal_heading, center_distance = 0,0,0

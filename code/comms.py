@@ -12,7 +12,7 @@ class State:
 	OFFLINE = 0
 	CONNECTED = 1
 
-global host, port
+global host_client, host_server, port
 
 # Go to 'Network & Connections' tab 
 # Set Bluetooth to 'Powered', 'Visible' and 'Start Scan'
@@ -30,7 +30,16 @@ addresses = {
 	"Multicolor Robot": "CC:78:AB:34:70:7C",
 }
 
-host, port = addresses["Green Robot"], 4
+# GREEN ROBOT 	= ID 0
+# MULTICOLOR 	= ID 1
+
+def InitComms(calibration):
+	global host_client, host_server, port
+
+	host_server = addresses[["Green Robot", "Multicolor Robot"][calibration.robot_id]]
+	host_client = addresses[["Green Robot", "Multicolor Robot"][calibration.robot_id - 1]]
+
+	port = 4
 
 state = State.OFFLINE
 my_data, other_data = {}, {}
@@ -58,14 +67,14 @@ def Receive(robot_socket):
 
 def Server():
 	global state
-	global host, port
+	global host_server, port
 
 	server = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-	server.bind((host,port))
+	server.bind((host_server,port))
 
 	server.listen()
 
-	print("Waiting for client at {}".format(host))
+	print("Waiting for client at {}".format(host_server))
 
 	client,addr = server.accept()
 
@@ -77,12 +86,12 @@ def Server():
 
 def Client():
 	global state
-	global host, port
+	global host_client, port
 
 	client = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
 	client.settimeout(10)
 
-	client.connect((host, port))
+	client.connect((host_client, port))
 
 	state = State.CONNECTED
 
