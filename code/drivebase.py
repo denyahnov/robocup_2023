@@ -4,9 +4,14 @@ import math
 
 global motors
 
-motors = {port: MediumMotor("out" + port) for port in "ABCD"}
+class DriveSpeed:
+	FAST = 100
+	NORMAL = 100
+	SLOW = 40
 
-DRIVEBASE_SPEED = 100
+	SPEED = NORMAL
+
+motors = {port: MediumMotor("out" + port) for port in "ABCD"}
 
 # A and D are negative
 
@@ -28,16 +33,16 @@ def MoveTo(angle:float) -> list:
 		back_right,		# Motor D
 	]
 
-def ScaleSpeeds(speeds:list,target_value:int = DRIVEBASE_SPEED) -> list:
+def ScaleSpeeds(speeds:list,target_value:int = DriveSpeed.SPEED) -> list:
 	greatest = max([abs(speed) for speed in speeds])
 
 	return [round(s * (target_value / greatest)) for s in speeds]
 
-def Drive(speeds,scale_speeds=True):
+def Drive(speeds,scale_speeds=True,speed=DriveSpeed.SPEED):
 	global motors
 
 	if scale_speeds:
-		speeds = ScaleSpeeds(speeds)
+		speeds = ScaleSpeeds(speeds,speed)
 
 	speeds = Clamp(speeds)
 
@@ -81,7 +86,7 @@ def Turn(speeds,turn_speed):
 	return [s + turn_speed for s in speeds]
 
 def TurnToHeading(angle):
-	return (angle + 2) * 1.5
+	return (angle + 2) * 1.45
 
 def IsStalled():
 	return any([motors[i].is_stalled for i in motors])

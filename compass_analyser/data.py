@@ -1,6 +1,6 @@
 import json
 
-with open("compass2.json","r") as file:
+with open("compass.json","r") as file:
 	data = json.load(file)
 
 import matplotlib.pyplot as plt

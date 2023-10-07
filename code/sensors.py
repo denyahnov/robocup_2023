@@ -12,8 +12,8 @@ backIR = Sensor(INPUT_4,driver_name="ht-nxt-ir-seek-v2")
 Compass = Sensor(INPUT_2,driver_name="ht-nxt-compass")
 Ultrasonic = UltrasonicSensor(INPUT_3)
 
-frontIR.mode = "AC-ALL"
-backIR.mode = "AC-ALL"
+frontIR.mode 	= "AC-ALL"
+backIR.mode 	= "AC-ALL"
 
 Compass.mode = "COMPASS"
 
@@ -77,11 +77,11 @@ def UpdateValues():
 
 	Values.ball_angle = ConvertAngle(Values.ball_direction * 30)
 
-	Values.compass = GetRelativeAngle(Compass.value(), calibration.goal_heading)
+	Values.raw_compass = Compass.value()
+
+	Values.compass = GetRelativeAngle(Values.raw_compass, calibration.goal_heading)
 
 	Values.ultrasonic = Ultrasonic.distance_centimeters - calibration.center_distance
-
-	Values.touch_sensor = False
 
 	Values.near_ball = NearBall()
 	

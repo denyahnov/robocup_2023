@@ -37,7 +37,7 @@ def InitComms(calibration):
 	global host_client, host_server, port
 
 	host_server = addresses[["Green Robot", "Multicolor Robot"][calibration.robot_id]]
-	host_client = addresses[["Green Robot", "Multicolor Robot"][calibration.robot_id - 1]]
+	host_client = addresses[["Multicolor Robot", "Green Robot"][calibration.robot_id]]
 
 	port = 4
 

@@ -1,6 +1,29 @@
 
 # BEHAVIOUR HELPERS
 
+def GetDirection(values):
+	"""Calculate Robot Chase Direction"""
+	
+	# Angle: Close, Far
+
+	return {
+		"0":  [0,0],
+
+		"30": [90,53],
+		"60": [128,88],
+		"90": [170,120],
+		"120": [-147,170],
+		"150": [-110,-175],
+		"180": [-90,-150],
+		
+		"-30": [-90,-53],
+		"-60": [-128,-88],
+		"-90": [-170,-120],
+		"-120": [147,-170],
+		"-150": [110,175],
+		"-180": [90,150],
+	}[str(values.ball_angle)][int(not values.near_ball)]
+
 def FixCompass(drivebase,values,speeds) -> list:
 	return drivebase.Turn(speeds, drivebase.TurnToHeading(values.compass))
 
@@ -12,29 +35,43 @@ def Score(drivebase,values):
 	
 	# If near ball, drive behind it instead of into it
 	if values.near_ball:
-		angle = values.ball_angle * 1.4
+		angle = values.ball_angle * 1.7
 
 	else:
 		angle = values.ball_angle
+
+	if (-30 <= angle <= 30) or (angle <= -150) or (angle >= 150): 
+		drivebase.DriveSpeed.SPEED = drivebase.DriveSpeed.FAST
+	elif (50 <= angle <= 105) or (-50 >= angle >= -105) and values.near_ball:
+		drivebase.DriveSpeed.SPEED = drivebase.DriveSpeed.SLOW
+	else:
+		drivebase.DriveSpeed.SPEED = drivebase.DriveSpeed.NORMAL
 
 	# Calculate 4 motor speeds
 	speeds = drivebase.ScaleSpeeds(drivebase.MoveTo(angle))
 	
 	# Turn to fix compass
-	turned_speeds = drivebase.Turn(speeds, drivebase.TurnToHeading(values.ultrasonic))
+	turned_speeds = drivebase.Turn(speeds, drivebase.TurnToHeading(values.ultrasonic / 2.5))
 
 	# Start motors
-	return drivebase.Drive(drivebase.ScaleSpeeds(turned_speeds))
+	return drivebase.Drive(turned_speeds)
 
 def Chase(drivebase,values):
 	"""Drive towards the ball and face 0 degrees"""
 
 	# If near ball, drive behind it instead of into it
 	if values.near_ball:
-		angle = values.ball_angle * 1.4
+		angle = values.ball_angle * 1.7
 
 	else:
 		angle = values.ball_angle
+
+	if (-30 <= angle <= 30) or (angle <= -150) or (angle >= 150): 
+		drivebase.DriveSpeed.SPEED = drivebase.DriveSpeed.FAST
+	elif (50 <= angle <= 105) or (-50 >= angle >= -105) and values.near_ball:
+		drivebase.DriveSpeed.SPEED = drivebase.DriveSpeed.SLOW
+	else:
+		drivebase.DriveSpeed.SPEED = drivebase.DriveSpeed.NORMAL
 
 	# Calculate 4 motor speeds
 	speeds = drivebase.ScaleSpeeds(drivebase.MoveTo(angle))
@@ -43,7 +80,7 @@ def Chase(drivebase,values):
 	turned_speeds = FixCompass(drivebase,values,speeds)
 
 	# Start motors
-	return drivebase.Drive(drivebase.ScaleSpeeds(turned_speeds))
+	return drivebase.Drive(turned_speeds)
 
 def Track(drivebase,values):
 	"""Turn to face the ball but don't drive towards it"""

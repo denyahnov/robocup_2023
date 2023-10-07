@@ -57,17 +57,18 @@ def Load():
 		Save()
 
 def CalibrateCompass(brick,drivebase,sensors):
+	"""Calibrate the compass to find the most accurate heading via the compass graph"""
+	
 	global goal_heading
 
 	brick.Color('orange')
 
-	# Use Compass graph to find most accurate heading
 	goldilocks_heading = 50
 
 	while not brick.buttons.enter:
 		compass = sensors.ConvertAngle((sensors.Compass.value() - goldilocks_heading) % 360)
 
-		drivebase.Drive(drivebase.Turn([0,0,0,0],drivebase.TurnToHeading(compass)), scale_speeds=False)
+		drivebase.Drive(drivebase.Turn([0,0,0,0],drivebase.TurnToHeading(compass/2)), scale_speeds=False)
 
 		if -1 <= compass <= 1:
 			brick.PlayTone(600,time=0.5)

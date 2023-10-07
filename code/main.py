@@ -44,11 +44,6 @@ def main():
 
 	sensors.Values.robot_running = True
 
-	kickoff_length = 20
-
-	for _ in range(kickoff_length):
-		behaviours.Kickoff(drivebase,sensors.Values)
-
 	while True:
 
 		# Update button variables
@@ -58,7 +53,6 @@ def main():
 		if brick.buttons.enter or brick.buttons.backspace: break
 
 		sensors.UpdateValues()
-
 
 		if comms.state == comms.State.CONNECTED:
 
