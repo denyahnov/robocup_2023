@@ -9,19 +9,19 @@ def GetDirection(values):
 	return {
 		"0":  [0,0],
 
-		"30": [90,53],
-		"60": [128,88],
-		"90": [170,120],
-		"120": [-147,170],
-		"150": [-110,-175],
-		"180": [-90,-150],
+		"30": [50,35],
+		"60": [115,65],
+		"90": [150,115],
+		"120": [205,125],
+		"150": [255,155],
+		"180": [305,185],
 		
-		"-30": [-90,-53],
-		"-60": [-128,-88],
-		"-90": [-170,-120],
-		"-120": [147,-170],
-		"-150": [110,175],
-		"-180": [90,150],
+		"-30": [-50,-35],
+		"-60": [-115,-65],
+		"-90": [-150,-115],
+		"-120": [-205,-125],
+		"-150": [-255,-155],
+		"-180": [-305,-185],
 	}[str(values.ball_angle)][int(not values.near_ball)]
 
 def FixCompass(drivebase,values,speeds) -> list:
@@ -34,11 +34,7 @@ def Score(drivebase,values):
 	"""Same as `Chase` except it faces the goal"""
 	
 	# If near ball, drive behind it instead of into it
-	if values.near_ball:
-		angle = values.ball_angle * 1.7
-
-	else:
-		angle = values.ball_angle
+	angle = GetDirection(values)
 
 	if (-30 <= angle <= 30) or (angle <= -150) or (angle >= 150): 
 		drivebase.DriveSpeed.SPEED = drivebase.DriveSpeed.FAST
@@ -60,11 +56,7 @@ def Chase(drivebase,values):
 	"""Drive towards the ball and face 0 degrees"""
 
 	# If near ball, drive behind it instead of into it
-	if values.near_ball:
-		angle = values.ball_angle * 1.7
-
-	else:
-		angle = values.ball_angle
+	angle = GetDirection(values)
 
 	if (-30 <= angle <= 30) or (angle <= -150) or (angle >= 150): 
 		drivebase.DriveSpeed.SPEED = drivebase.DriveSpeed.FAST
